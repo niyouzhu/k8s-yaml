@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: joget-dx7-tomcat9-pv
+  name: joget-community-pv
   labels:
     type: local
 spec:
@@ -16,7 +16,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: joget-dx7-tomcat9-pvc
+  name: joget-community-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -27,33 +27,33 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: joget-dx7-tomcat9
+  name: joget-community
   labels: 
-    app: joget-dx7-tomcat9
+    app: joget-community
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: joget-dx7-tomcat9
+      app: joget-community
   template:
     metadata:
       labels: 
-        app: joget-dx7-tomcat9
+        app: joget-community
     spec:
       volumes:
-        - name: joget-dx7-tomcat9-pv
+        - name: joget-community-pv
           persistentVolumeClaim:
-            claimName: joget-dx7-tomcat9-pvc
+            claimName: joget-community-pvc
       securityContext:
         runAsUser: 1000
         fsGroup: 0
       containers:
-        - name: joget-dx7-tomcat9
-          image: jogetworkflow/joget-dx7-tomcat9:7.0.27
+        - name: joget-community
+          image: jogetworkflow/joget-community:7.0.27
           ports:
             - containerPort: 8080
           volumeMounts:
-            - name: joget-dx7-tomcat9-pv
+            - name: joget-community-pv
               mountPath: /opt/joget/wflow
           env:
             - name: KUBERNETES_NAMESPACE
@@ -64,9 +64,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: joget-dx7-tomcat9
+  name: joget-community
   labels:
-    app: joget-dx7-tomcat9
+    app: joget-community
 spec:
   ports:
   - name: http
@@ -76,13 +76,13 @@ spec:
     port: 9080
     targetPort: 9080  
   selector:
-    app: joget-dx7-tomcat9
+    app: joget-community
   type: NodePort
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: joget-dx7-tomcat9-clusterrolebinding
+  name: joget-community-clusterrolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -95,7 +95,7 @@ subjects:
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: joget-dx7-tomcat9-ingress
+  name: joget-community-ingress
   annotations:
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/rewrite-target: /
@@ -106,6 +106,6 @@ spec:
           - path: /
             pathType: Prefix
             backend:
-              serviceName: joget-dx7-tomcat9
+              serviceName: joget-community
               servicePort: 8080
        
