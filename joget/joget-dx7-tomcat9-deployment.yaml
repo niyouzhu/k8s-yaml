@@ -49,7 +49,7 @@ spec:
         fsGroup: 0
       containers:
         - name: joget-dx7-tomcat9
-          image: jogetworkflow/joget-dx7-tomcat9:latest
+          image: jogetworkflow/joget-dx7-tomcat9:7.0.27
           ports:
             - containerPort: 8080
           volumeMounts:
