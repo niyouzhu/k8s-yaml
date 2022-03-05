@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: D:\Github\k8s-yaml\saltcorn\kompose-windows-amd64.exe convert
+    kompose.version: 1.26.0 (40646f47)
+    traefik.enable: "true"
+    traefik.http.routers.saltcorn-app.entrypoints: secure
+    traefik.http.routers.saltcorn-app.rule: Host(`saltcorn.`)
+    traefik.http.routers.saltcorn-app.tls.certresolver: leresolver
+    traefik.http.services.saltcorn-app.loadbalancer.server.port: "3000"
+  creationTimestamp: null
+  labels:
+    io.kompose.service: saltcorn-app
+  name: saltcorn-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: saltcorn-app
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: D:\Github\k8s-yaml\saltcorn\kompose-windows-amd64.exe convert
+        kompose.version: 1.26.0 (40646f47)
+        traefik.enable: "true"
+        traefik.http.routers.saltcorn-app.entrypoints: secure
+        traefik.http.routers.saltcorn-app.rule: Host(`saltcorn.`)
+        traefik.http.routers.saltcorn-app.tls.certresolver: leresolver
+        traefik.http.services.saltcorn-app.loadbalancer.server.port: "3000"
+      creationTimestamp: null
+      labels:
+        io.kompose.network/saltcorn-net: "true"
+        io.kompose.service: saltcorn-app
+    spec:
+      containers:
+        - args:
+            - serve
+          env:
+            - name: PGDATABASE
+            - name: PGHOST
+              value: saltcorn-db
+            - name: PGPASSWORD
+            - name: PGUSER
+            - name: SALTCORN_SESSION_SECRET
+          image: saltcorn/saltcorn
+          name: saltcorn
+          ports:
+            - containerPort: 3000
+          resources: {}
+      restartPolicy: Always
+status: {}

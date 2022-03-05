@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: D:\Github\k8s-yaml\saltcorn\kompose-windows-amd64.exe convert
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: saltcorn-db
+  name: saltcorn-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: saltcorn-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: D:\Github\k8s-yaml\saltcorn\kompose-windows-amd64.exe convert
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/saltcorn-net: "true"
+        io.kompose.service: saltcorn-db
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+            - name: POSTGRES_PASSWORD
+            - name: POSTGRES_USER
+          image: postgres:13-alpine
+          name: saltcorn-db
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: saltcorn-db-claim0
+            - mountPath: /docker-entrypoint-initdb.d/init.sql
+              name: saltcorn-db-claim1
+      restartPolicy: Always
+      volumes:
+        - name: saltcorn-db-claim0
+          persistentVolumeClaim:
+            claimName: saltcorn-db-claim0
+        - name: saltcorn-db-claim1
+          persistentVolumeClaim:
+            claimName: saltcorn-db-claim1
+status: {}
