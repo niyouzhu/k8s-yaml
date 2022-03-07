@@ -165,14 +165,14 @@ services:
 # Override values in couchDB subchart
 couchdb:
   ## clusterSize is the initial size of the CouchDB cluster.
-  clusterSize: 3
+  clusterSize: 1
   allowAdminParty: false
 
   # Secret Management
   createAdminSecret: true
 
-  # adminUsername: budibase
-  # adminPassword: budibase
+  adminUsername: budibase
+  adminPassword: budibase
   # adminHash: -pbkdf2-this_is_not_necessarily_secure_either
   # cookieAuthSecret: admin
 
