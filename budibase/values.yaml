@@ -165,7 +165,7 @@ services:
 # Override values in couchDB subchart
 couchdb:
   ## clusterSize is the initial size of the CouchDB cluster.
-  clusterSize: 1
+  clusterSize: 3
   allowAdminParty: false
 
   # Secret Management
@@ -195,7 +195,7 @@ couchdb:
   ## provisioning of Persistent Volumes; leaving it unset will invoke the default
   ## provisioner.
   persistentVolume:
-    enabled: false
+    enabled: true 
     accessModes:
       - ReadWriteOnce
     size: 10Gi
