@@ -121,6 +121,13 @@ spec:
         ports:
         - containerPort: {{ .Values.services.worker.port }}
         resources: {}
+        volumeMounts:
+        - mountPath: /etc/localtime
+          name: timezone  
       restartPolicy: Always
       serviceAccountName: ""
+      volumes:
+      - name: timezone
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
 status: {}

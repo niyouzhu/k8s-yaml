@@ -60,11 +60,16 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: minio-data
+        - mountPath: /etc/localtime
+          name: timezone        
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
       - name: minio-data
         persistentVolumeClaim:
           claimName: minio-data
+      - name: timezone
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
 status: {}
 {{- end }}
