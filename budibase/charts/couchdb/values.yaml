@@ -1,5 +1,5 @@
 ## clusterSize is the initial size of the CouchDB cluster.
-clusterSize: 3
+clusterSize: 1
 
 ## If allowAdminParty is enabled the cluster will start up without any database
 ## administrator account; i.e., all users will be granted administrative
