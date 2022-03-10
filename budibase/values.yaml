@@ -161,6 +161,7 @@ services:
     region: "" # AWS_REGION if using S3 or existing minio secret
     url: "http://minio-service:9000" # only change if pointing to existing minio cluster or S3 and minio: false
     storage: 10Gi
+    clusterSize: 1
 
 # Override values in couchDB subchart
 couchdb:
