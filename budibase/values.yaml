@@ -85,7 +85,7 @@ tolerations: []
 affinity: {}
 
 globals:
-  appVersion: "latest"
+  appVersion: "v1.0.82"
   budibaseEnv: PRODUCTION
   enableAnalytics: true
   sentryDSN: ""
@@ -111,7 +111,7 @@ globals:
   jwtSecret: ""
 
   smtp:
-    enabled: false
+    enabled: true
 
 services:
   budibaseVersion: latest
