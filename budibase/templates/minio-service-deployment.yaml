@@ -70,5 +70,4 @@ spec:
       - name: timezone
         hostPath:
           path: /usr/share/zoneinfo/Asia/Shanghai
-status: {}
 {{- end }}
