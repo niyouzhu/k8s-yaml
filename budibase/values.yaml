@@ -152,7 +152,7 @@ services:
     storage: 100Mi
 
   objectStore:
-    minio: true
+    minio: false
     browser: true
     port: 9000
     replicaCount: 1
