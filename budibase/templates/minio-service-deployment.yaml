@@ -1,6 +1,6 @@
 {{- if .Values.services.objectStore.minio }}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   annotations:
     kompose.cmd: kompose convert
