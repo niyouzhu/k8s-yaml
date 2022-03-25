@@ -134,16 +134,7 @@ core:
     #   cpu: 500m
     #   memory: 1024Mi
 
-  persistence:
-    storageClassName: jumpserver-data
-    accessModes:
-      - ReadWriteMany
-    size: 10Gi
-    # annotations: {}
-    finalizers:
-      - kubernetes.io/pvc-protection
-    # subPath: ""
-    # existingClaim:
+
 
   volumeMounts: []
 
@@ -220,14 +211,7 @@ koko:
     #   cpu: 100m
     #   memory: 128Mi
 
-  persistence:
-    storageClassName: jumpserver-data
-    accessModes:
-      - ReadWriteMany
-    size: 10Gi
-    # annotations: {}
-    finalizers:
-      - kubernetes.io/pvc-protection
+
 
   volumeMounts: []
 
@@ -301,14 +285,7 @@ lion:
     #   cpu: 100m
     #   memory: 512Mi
 
-  persistence:
-    storageClassName: jumpserver-data
-    accessModes:
-      - ReadWriteMany
-    size: 10Gi
-    # annotations: {}
-    finalizers:
-      - kubernetes.io/pvc-protection
+
 
   volumeMounts: []
 
@@ -381,14 +358,7 @@ omnidb:
     #   cpu: 100m
     #   memory: 128Mi
 
-  persistence:
-    storageClassName: jumpserver-data
-    accessModes:
-      - ReadWriteMany
-    size: 10Gi
-    # annotations: {}
-    finalizers:
-      - kubernetes.io/pvc-protection
+
 
   volumeMounts: []
 
@@ -458,14 +428,7 @@ xrdp:
     #   cpu: 100m
     #   memory: 128Mi
 
-  persistence:
-    storageClassName: jumpserver-data
-    accessModes:
-      - ReadWriteMany
-    size: 10Gi
-    # annotations: {}
-    finalizers:
-      - kubernetes.io/pvc-protection
+
 
   volumeMounts: []
 
@@ -535,14 +498,7 @@ web:
     #   cpu: 100m
     #   memory: 128Mi
 
-  persistence:
-    storageClassName: jumpserver-data
-    accessModes:
-      - ReadWriteMany
-    size: 1Gi
-    # annotations: {}
-    finalizers:
-      - kubernetes.io/pvc-protection
+
 
   volumeMounts: []
 
