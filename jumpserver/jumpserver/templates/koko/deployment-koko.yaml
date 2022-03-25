@@ -35,7 +35,7 @@ spec:
         - name: {{ $containerName }}
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
-          image: {{ $image }}
+          image: "{{$image}}"
           imagePullPolicy: {{ .image.pullPolicy }}
           {{- with .command }}
           command:
@@ -50,32 +50,30 @@ spec:
               protocol: TCP
           env:
             - name: CORE_HOST
-              value: "http://{{ include "jumpserver.fullname" $ }}-jms-core:{{ $.Values.core.service.web.port }}"
+              value: "http://{{include "jumpserver.fullname" $}}-jms-core:{{$.Values.core.service.web.port}}"
             - name: BOOTSTRAP_TOKEN
-              value: {{ $.Values.core.config.bootstrapToken | quote }}
+              value: "{{ $.Values.core.config.bootstrapToken }}"
             - name: LOG_LEVEL
-              value: {{ .config.log.level | quote }}
+              value: "{{ .config.log.level }}"
             - name: SSHD_PORT
-              value: {{ .service.ssh.port | quote }}
+              value: "{{ .service.ssh.port }}"
             - name: HTTPD_PORT
-              value: {{ .service.web.port | quote }}
-            - name: REUSE_CONNECTION
-              value: "false"
+              value: "{{ .service.web.port }}"
             - name: SHARE_ROOM_TYPE
               value: "redis"
             - name: REDIS_HOST
-              value: {{ include "jumpserver.redis.host" $ | quote }}
+              value: "{{ include "jumpserver.redis.host" $ }}"
             - name: REDIS_PORT
-              value: {{ include "jumpserver.redis.port" $ | quote }}
+              value: "{{ include "jumpserver.redis.port" $ }}"
             - name: REDIS_PASSWORD
-              value: {{ include "jumpserver.redis.password" $ | quote }}
+              value: "{{ include "jumpserver.redis.password" $ }}"
           {{- with .env }}
-            {{- tpl (toYaml .) $ | nindent 12 | quote }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
           {{- end }}
           livenessProbe:
-            {{- toYaml .livenessProbe | nindent 12 }}
+            {{- toYaml .livenessProbe | nindent 12}}
           readinessProbe:
-            {{- toYaml .readinessProbe | nindent 12 }}
+            {{- toYaml .readinessProbe | nindent 12}}
           resources:
             {{- toYaml .resources | nindent 12 }}
           volumeMounts:
@@ -87,7 +85,7 @@ spec:
       restartPolicy: Always
       volumes:
         - persistentVolumeClaim:
-            claimName: '{{ include "jumpserver.fullname" $ }}-jms-koko-data'
+            claimName: '{{include "jumpserver.fullname" $}}-jms-koko-data'
           name: "jms-koko-data"
       {{- with .volumes }}
         {{- tpl (toYaml .) $ | nindent 8 }}

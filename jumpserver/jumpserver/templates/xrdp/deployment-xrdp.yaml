@@ -35,7 +35,7 @@ spec:
         - name: {{ $containerName }}
           securityContext:
             {{- toYaml .securityContext | nindent 12 }}
-          image: {{ $image }}
+          image: "{{$image}}"
           imagePullPolicy: {{ .image.pullPolicy }}
           {{- with .command }}
           command:
@@ -43,15 +43,13 @@ spec:
           {{- end }}
           env:
             - name: CORE_HOST
-              value: "http://{{ include "jumpserver.fullname" $ }}-jms-core:{{ $.Values.core.service.web.port }}"
+              value: "http://{{include "jumpserver.fullname" $}}-jms-core:{{$.Values.core.service.web.port}}"
             - name: BOOTSTRAP_TOKEN
-              value: {{ $.Values.core.config.bootstrapToken | quote }}
+              value: "{{ $.Values.core.config.bootstrapToken }}"
             - name: LOG_LEVEL
-              value: {{ .config.log.level | quote }}
-            - name: JUMPSERVER_ENABLE_FONT_SMOOTHING
-              value: "true"
+              value: "{{ .config.log.level }}"
           {{- with .env }}
-            {{- tpl (toYaml .) $ | nindent 12 | quote }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
           {{- end }}
           ports:
             - name: rdp
@@ -72,7 +70,7 @@ spec:
       restartPolicy: Always
       volumes:
         - persistentVolumeClaim:
-            claimName: '{{ include "jumpserver.fullname" $ }}-jms-xrdp-data'
+            claimName: '{{include "jumpserver.fullname" $}}-jms-xrdp-data'
           name: "jms-xrdp-data"
       {{- with .volumes }}
         {{- tpl (toYaml .) $ | nindent 8 }}
