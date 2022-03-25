@@ -50,15 +50,15 @@ ingress:
   enabled: true
   annotations:
     # kubernetes.io/tls-acme: "true"
-    compute-full-forwarded-for: "true"
-    use-forwarded-headers: "true"
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: "4096m"
     nginx.ingress.kubernetes.io/configuration-snippet: |
-       proxy_set_header Upgrade "websocket";
-       proxy_set_header Connection "Upgrade";
+      proxy_set_header Upgrade "websocket";
+      proxy_set_header Connection "Upgrade";
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
   hosts:
-    - "jump.jumpserver.org"
+    - "jump.gyz.com"
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -73,7 +73,7 @@ core:
   config:
     # Generate a new random secret key by execute `cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 50`
     secretKey: "CeUEwQ7y1arAR9ROyP60gia3ZwEMIL0aNHPzVEAKvRi4ijIcz3"
-    # Generate a new random bootstrap token by execute `cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 16`
+    # Generate a new random bootstrap token by execute `cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 24`
     bootstrapToken: "FVhOlFWACZknQkCI"
     # Enabled it for debug
     debug: false
@@ -134,7 +134,16 @@ core:
     #   cpu: 500m
     #   memory: 1024Mi
 
-
+  persistence:
+    storageClassName: jumpserver-data
+    accessModes:
+      - ReadWriteMany
+    size: 10Gi
+    # annotations: {}
+    finalizers:
+      - kubernetes.io/pvc-protection
+    # subPath: ""
+    # existingClaim:
 
   volumeMounts: []
 
@@ -211,7 +220,14 @@ koko:
     #   cpu: 100m
     #   memory: 128Mi
 
-
+  persistence:
+    storageClassName: jumpserver-data
+    accessModes:
+      - ReadWriteMany
+    size: 10Gi
+    # annotations: {}
+    finalizers:
+      - kubernetes.io/pvc-protection
 
   volumeMounts: []
 
@@ -285,7 +301,14 @@ lion:
     #   cpu: 100m
     #   memory: 512Mi
 
-
+  persistence:
+    storageClassName: jumpserver-data
+    accessModes:
+      - ReadWriteMany
+    size: 10Gi
+    # annotations: {}
+    finalizers:
+      - kubernetes.io/pvc-protection
 
   volumeMounts: []
 
@@ -344,7 +367,7 @@ omnidb:
   service:
     type: ClusterIP
     web:
-      port: 8082 
+      port: 8082
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -358,7 +381,14 @@ omnidb:
     #   cpu: 100m
     #   memory: 128Mi
 
-
+  persistence:
+    storageClassName: jumpserver-data
+    accessModes:
+      - ReadWriteMany
+    size: 10Gi
+    # annotations: {}
+    finalizers:
+      - kubernetes.io/pvc-protection
 
   volumeMounts: []
 
@@ -428,7 +458,14 @@ xrdp:
     #   cpu: 100m
     #   memory: 128Mi
 
-
+  persistence:
+    storageClassName: jumpserver-data
+    accessModes:
+      - ReadWriteMany
+    size: 10Gi
+    # annotations: {}
+    finalizers:
+      - kubernetes.io/pvc-protection
 
   volumeMounts: []
 
@@ -498,7 +535,14 @@ web:
     #   cpu: 100m
     #   memory: 128Mi
 
-
+  persistence:
+    storageClassName: jumpserver-data
+    accessModes:
+      - ReadWriteMany
+    size: 1Gi
+    # annotations: {}
+    finalizers:
+      - kubernetes.io/pvc-protection
 
   volumeMounts: []
 
