@@ -1,0 +1,13 @@
+annotations:
+  artifacthub.io/prerelease: "true"
+apiVersion: v2
+keywords:
+- tooljet
+maintainers:
+- email: krzwiatrzyk@protonmail.com
+  name: Krzwiatrzyk
+name: ToolJet
+sources:
+- https://tooljet.com
+- https://github.com/tooljet/tooljet
+version: 0.0.2
