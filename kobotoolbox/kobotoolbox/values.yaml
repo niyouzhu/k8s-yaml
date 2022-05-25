@@ -138,11 +138,11 @@ general:
   replicas: 1
   # -- Parent domain to serve all apps from
   # __WARNING__: The subdomains MUST be reachable since the application will try to call itself at this address
-  externalDomain: example.com
+  externalDomain: gyz.com
   # -- Public URL scheme
-  externalScheme: http
+  externalScheme: https
   # -- Public URL port
-  externalPort:
+  externalPort: 443
   # -- Random Django secret
   djangoSecret: EKMvRtT2RFB3xDvFty4SVCsTyaQAHS9aA2mkRqtTp9zQYz48fp
   # -- Enable various debug flags?
@@ -153,7 +153,7 @@ general:
     # -- Admin user password
     password: kobo
   # -- Support email visible from the website
-  supportEmail: support@example.com
+  supportEmail: support@gyz.com
   # -- Service type to expose
   serviceType: ClusterIP
   # -- Set this to true in order to force internal resolution of external domains, in case those aren't reachable from inside the containers.
@@ -206,7 +206,7 @@ global:
     # -- Redis password
     password: brFdS9b7Xp
   # -- Will be used by this and all subcharts
-  storageClass: standard
+  storageClass: nfs
 
 rediscache:
   enabled: true

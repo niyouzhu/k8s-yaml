@@ -1,0 +1,15 @@
+apiVersion: v2
+appVersion: v0.0.0
+description: Backup postgres databases using pg_dump, retention and schedules
+home: https://github.com/prodrigestivill/docker-postgres-backup-local
+keywords:
+- postgres
+- backup
+- retention
+- pg_dump
+name: postgres-pgdump-backup
+sources:
+- https://github.com/EugenMayer/helm-charts/chats/postgres-pgdump-backup
+- https://github.com/prodrigestivill/docker-postgres-backup-local
+type: application
+version: 0.4.0

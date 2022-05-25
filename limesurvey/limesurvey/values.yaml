@@ -45,14 +45,14 @@ externalDatabase:
   # Type of external database ("mysql" or "psql")
   type: mysql
   # External Database server host
-  host: mariadb.example.com
+  host: mysql-limesurvey.default.svc.cluster.local
   # External Database server port
   port: 3306
   # External Database username
-  username: limesurvey
+  username: root
   # External Database user password
   # (ignored when existingSecret is set)
-  password: null
+  password: gyz.limesurvey
   # External Database database name
   database: limesurvey
   # Use an existing secret for retrieving the database password.
@@ -64,9 +64,9 @@ limesurvey:
   # LimeSurvey initial Administrator Account
   admin:
     user: admin
-    password: null
+    password: admin
     name: Administrator
-    email: admin@example.com
+    email: niyouzhu@gyz.com
   # LimeSurvey permits the encryption of personal data
   # These values will be created as secret
   # https://manual.limesurvey.org/Data_encryption
@@ -100,7 +100,7 @@ limesurvey:
 persistence:
   # Enable persistence with PVC. If false, uses emptyDir instead.
   enabled: true
-  storageClassName: null
+  storageClassName: nfs
   accessModes:
     - ReadWriteOnce
   size: 5Gi
