@@ -166,12 +166,13 @@ services:
     secretKey: "" # AWS_SECRET_ACCESS_KEY if using S3 or existing minio secret
     region: "" # AWS_REGION if using S3 or existing minio secret
     url: "http://minio-service:9000" # only change if pointing to existing minio cluster or S3 and minio: false
-    storage: 100Mi
+    storage: 10Gi
     ## If defined, storageClassName: <storageClass>
     ## If set to "-", storageClassName: "", which disables dynamic provisioning
     ## If undefined (the default) or set to null, no storageClassName spec is
     ##   set, choosing the default provisioner.
     storageClass: ""
+    clusterSize: 1
 
 # Override values in couchDB subchart
 couchdb:
