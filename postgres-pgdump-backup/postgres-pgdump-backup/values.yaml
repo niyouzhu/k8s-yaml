@@ -1,12 +1,12 @@
 postgres:
-  # host:
+  host: postgresql-redmine-4-local-deployment.default.svc.cluster.local
   port: 5432
   auth:
     # either create the secret yourself
     # existingSecretName: "my-existing-secret"
     # or provide the user/password here and the secret will be created for you
-    # user:
-    # password:
+    user: root
+    password: gyz.redmine
 
 backup:
   database:
@@ -50,7 +50,7 @@ persistence:
   ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
   ##   GKE, AWS & OpenStack)
   ##
-  # storageClass: "local-path"
+  storageClass: "nfs"
 
   ## @param persistence.selector Selector to match an existing Persistent Volume
   ## selector:
