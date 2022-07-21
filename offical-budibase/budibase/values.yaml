@@ -87,7 +87,7 @@ tolerations: []
 affinity: {}
 
 globals:
-  appVersion: "latest"
+  appVersion: "v1.1.18"
   budibaseEnv: PRODUCTION
   enableAnalytics: "1"
   sentryDSN: ""
@@ -112,7 +112,7 @@ globals:
   jwtSecret: ""
 
   smtp:
-    enabled: false
+    enabled: true
 
 services:
   budibaseVersion: latest
@@ -166,7 +166,7 @@ services:
     secretKey: "" # AWS_SECRET_ACCESS_KEY if using S3 or existing minio secret
     region: "" # AWS_REGION if using S3 or existing minio secret
     url: "http://minio-service:9000" # only change if pointing to existing minio cluster or S3 and minio: false
-    storage: 100Mi
+    storage: 10Gi
     ## If defined, storageClassName: <storageClass>
     ## If set to "-", storageClassName: "", which disables dynamic provisioning
     ## If undefined (the default) or set to null, no storageClassName spec is
@@ -176,7 +176,7 @@ services:
 # Override values in couchDB subchart
 couchdb:
   ## clusterSize is the initial size of the CouchDB cluster.
-  clusterSize: 3
+  clusterSize: 1
   allowAdminParty: false
 
   # Secret Management
@@ -206,7 +206,7 @@ couchdb:
   ## provisioning of Persistent Volumes; leaving it unset will invoke the default
   ## provisioner.
   persistentVolume:
-    enabled: false
+    enabled: true 
     accessModes:
       - ReadWriteOnce
     size: 10Gi
