@@ -10,9 +10,8 @@
 controller:
   name: controller
   image:
-    registry: docker.io
-    #registry: swr.cn-east-2.myhuaweicloud.com
-    image: liangjw/ingress-nginx-controller
+    registry: k8s.gcr.io
+    image: ingress-nginx/controller
     # for backwards compatibility consider setting the full image url via the repository value below
     # use *either* current default registry/image or repository format or installing chart by providing the values.yaml will fail
     # repository:
@@ -607,9 +606,8 @@ controller:
     patch:
       enabled: true
       image:
-        #registry: swr.cn-east-2.myhuaweicloud.com
-        registry: docker.io
-        image: liangjw/kube-webhook-certgen
+        registry: k8s.gcr.io
+        image: ingress-nginx/kube-webhook-certgen
         # for backwards compatibility consider setting the full image url via the repository value below
         # use *either* current default registry/image or repository format or installing chart by providing the values.yaml will fail
         # repository:
@@ -734,9 +732,8 @@ defaultBackend:
 
   name: defaultbackend
   image:
-    registry: docker.io
-    #registry: swr.cn-east-2.myhuaweicloud.com
-    image: ibmcom/defaultbackend-amd64
+    registry: k8s.gcr.io
+    image: defaultbackend-amd64
     # for backwards compatibility consider setting the full image url via the repository value below
     # use *either* current default registry/image or repository format or installing chart by providing the values.yaml will fail
     # repository:
