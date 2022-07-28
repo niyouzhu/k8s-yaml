@@ -87,12 +87,11 @@ tolerations: []
 affinity: {}
 
 globals:
-  appVersion: "v1.1.18"
+  appVersion: "v1.1.28"
   budibaseEnv: PRODUCTION
   enableAnalytics: "1"
   sentryDSN: ""
-  posthogToken: ""
-  #posthogToken:"phc_fg5I3nDOf6oJVMHSaycEhpPdlgS8rzXG2r6F2IpxCHS"
+  posthogToken: "phc_fg5I3nDOf6oJVMHSaycEhpPdlgS8rzXG2r6F2IpxCHS"
   logLevel: info
   selfHosted: "1" # set to 0 for budibase cloud environment, set to 1 for self-hosted setup
   multiTenancy: "0" # set to 0 to disable multiple orgs, set to 1 to enable multiple orgs
@@ -104,7 +103,7 @@ globals:
   google:
     clientId: ""
     secret: ""
-  automationMaxIterations: "500"
+  automationMaxIterations: "200"
 
   createSecrets: true # creates an internal API key, JWT secrets and redis password for you
 
@@ -173,7 +172,6 @@ services:
     ## If undefined (the default) or set to null, no storageClassName spec is
     ##   set, choosing the default provisioner.
     storageClass: ""
-    clusterSize: 1
 
 # Override values in couchDB subchart
 couchdb:
