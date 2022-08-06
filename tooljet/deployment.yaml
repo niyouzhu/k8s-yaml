@@ -44,45 +44,17 @@ spec:
           env:
             - name: PG_HOST
               value: postgresql-tooljet.default.svc.cluster.local
-              valueFrom:
-                secretKeyRef:
-                  name: server
-                  key: pg_host
             - name: PG_USER
               value: root
-              valueFrom:
-                secretKeyRef:
-                  name: server
-                  key: pg_user
             - name: PG_PASS
               value: gyz.tooljet
-              valueFrom:
-                secretKeyRef:
-                  name: server
-                  key: pg_password
             - name: PG_DB
               value: tooljet
-              valueFrom:
-                secretKeyRef:
-                  name: server
-                  key: pg_db
             - name: LOCKBOX_MASTER_KEY
               value: 33beb7129aeccf4b0850ef107d5c42e734bb8406337ebad4eac6c67152f4f841
-              valueFrom:
-                secretKeyRef:
-                  name: server
-                  key: lockbox_key
             - name: SECRET_KEY_BASE
               value: 104513564c26d84d5b89f1f3ecdcd8e2db0e7a490ccccb70b0be59cd122af75f8c13c6dd9683045970b4812a0c13e9900baafac0985d1d7ff374c384d1e8169a
-              valueFrom:
-                secretKeyRef:
-                  name: server
-                  key: secret_key_base
             - name: TOOLJET_HOST
               value: https://apps.gyz.com
-              valueFrom:
-                secretKeyRef:
-                  name: server
-                  key: tj_host
             - name: DEPLOYMENT_PLATFORM
               value: "k8s"
