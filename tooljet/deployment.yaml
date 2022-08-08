@@ -67,8 +67,8 @@ spec:
             - name: SMTP_DOMAIN
               value: "smtp.mxhichina.com"
             - name: SMTP_PORT
-              value: 25
+              value: "25"
             - name: COMMENT_FEATURE_ENABLE
-              value: true
+              value: "true"
             - name: ENABLE_MULTIPLAYER_EDITING
-              value: true
+              value: "true"
