@@ -55,7 +55,7 @@ spec:
             - name: SECRET_KEY_BASE
               value: 104513564c26d84d5b89f1f3ecdcd8e2db0e7a490ccccb70b0be59cd122af75f8c13c6dd9683045970b4812a0c13e9900baafac0985d1d7ff374c384d1e8169a
             - name: TOOLJET_HOST
-              value: http://localhost
+              value: http://apps.gyz.com
             - name: DEPLOYMENT_PLATFORM
               value: "k8s"
             - name: DEFAULT_FROM_EMAIL
