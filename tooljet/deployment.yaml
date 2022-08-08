@@ -58,3 +58,17 @@ spec:
               value: http://localhost
             - name: DEPLOYMENT_PLATFORM
               value: "k8s"
+            - name: DEFAULT_FROM_EMAIL
+              value: "system@gyzet.com"
+            - name: SMTP_USERNAME
+              value: "system@gyzet.com"
+            - name: SMTP_PASSWORD
+              value: "gyz@20131130"
+            - name: SMTP_DOMAIN
+              value: "smtp.mxhichina.com"
+            - name: SMTP_PORT
+              value: 25
+            - name: COMMENT_FEATURE_ENABLE
+              value: true
+            - name: ENABLE_MULTIPLAYER_EDITING
+              value: true
