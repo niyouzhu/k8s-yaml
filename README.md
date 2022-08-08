@@ -3,3 +3,6 @@
 added feature/#1-feature-stateful
 
 added feature/code_verification
+
+## Introduction
+* Name: Eric Nee
