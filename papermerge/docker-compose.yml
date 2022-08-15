@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.3'
 # Any top-level key starting with x- in a Docker Compose file will be
 # ignored
 x-backend: &backend  # yaml anchor definition
