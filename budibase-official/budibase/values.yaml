@@ -93,11 +93,11 @@ globals:
     secret: ""
   automationMaxIterations: "200"
 
-  createSecrets: false # creates an internal API key, JWT secrets and redis password for you
+  createSecrets: true # creates an internal API key, JWT secrets and redis password for you
 
   # if createSecrets is set to false, you can hard-code your secrets here
-  internalApiKey: "abcdefg"
-  jwtSecret: "gfedcba"
+  internalApiKey: ""
+  jwtSecret: ""
 
   smtp:
     enabled: false
