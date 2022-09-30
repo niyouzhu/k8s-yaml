@@ -1,6 +1,6 @@
 {{- if .Values.services.objectStore.minio }}
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   annotations:
     kompose.cmd: kompose convert
@@ -11,10 +11,11 @@ metadata:
   name: minio-service
 spec:
   replicas: 1
-  serviceName: minio-service
   selector:
     matchLabels:
       io.kompose.service: minio-service
+  strategy:
+    type: Recreate
   template:
     metadata:
       annotations:
@@ -62,8 +63,6 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: minio-data
-        - mountPath: /etc/localtime
-          name: timezone 
     {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -82,15 +81,5 @@ spec:
       - name: minio-data
         persistentVolumeClaim:
           claimName: minio-data
-      - name: timezone
-        hostPath:
-          path: /usr/share/zoneinfo/Asia/Shanghai
-  volumeClaimTemplates:
-  - metadata:
-      name: minio-data
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 10Gi
+status: {}
 {{- end }}

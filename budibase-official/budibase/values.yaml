@@ -74,12 +74,12 @@ tolerations: []
 affinity: {}
 
 globals:
-  appVersion: "v2.0.6"
+  appVersion: "latest"
   budibaseEnv: PRODUCTION
   tenantFeatureFlags: "*:LICENSING,*:USER_GROUPS"
   enableAnalytics: "1"
   sentryDSN: ""
-  posthogToken: "phc_fg5I3nDOf6oJVMHSaycEhpPdlgS8rzXG2r6F2IpxCHS"
+  posthogToken: "phc_bIjZL7oh2GEUd2vqvTBH8WvrX0fWTFQMs6H5KQxiUxU"
   logLevel: info
   selfHosted: "1" # set to 0 for budibase cloud environment, set to 1 for self-hosted setup
   multiTenancy: "0" # set to 0 to disable multiple orgs, set to 1 to enable multiple orgs
@@ -93,14 +93,14 @@ globals:
     secret: ""
   automationMaxIterations: "200"
 
-  createSecrets: true # creates an internal API key, JWT secrets and redis password for you
+  createSecrets: false # creates an internal API key, JWT secrets and redis password for you
 
   # if createSecrets is set to false, you can hard-code your secrets here
-  internalApiKey: ""
-  jwtSecret: ""
+  internalApiKey: "abcdefg"
+  jwtSecret: "gfedcba"
 
   smtp:
-    enabled: true
+    enabled: false
 
 #  elasticApmEnabled:
 #  elasticApmSecretToken:
@@ -164,7 +164,7 @@ services:
     secretKey: "" # AWS_SECRET_ACCESS_KEY if using S3 or existing minio secret
     region: "" # AWS_REGION if using S3 or existing minio secret
     url: "http://minio-service:9000" # only change if pointing to existing minio cluster or S3 and minio: false
-    storage: 10Gi
+    storage: 100Mi
     ## If defined, storageClassName: <storageClass>
     ## If set to "-", storageClassName: "", which disables dynamic provisioning
     ## If undefined (the default) or set to null, no storageClassName spec is
@@ -175,14 +175,14 @@ services:
 # Override values in couchDB subchart
 couchdb:
   ## clusterSize is the initial size of the CouchDB cluster.
-  clusterSize: 1
+  clusterSize: 3
   allowAdminParty: false
 
   # Secret Management
   createAdminSecret: true
 
-  adminUsername: budibase
-  adminPassword: budibase
+  # adminUsername: budibase
+  # adminPassword: budibase
   # adminHash: -pbkdf2-this_is_not_necessarily_secure_either
   # cookieAuthSecret: admin
 
@@ -205,7 +205,7 @@ couchdb:
   ## provisioning of Persistent Volumes; leaving it unset will invoke the default
   ## provisioner.
   persistentVolume:
-    enabled: true 
+    enabled: false
     accessModes:
       - ReadWriteOnce
     size: 10Gi

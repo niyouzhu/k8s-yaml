@@ -42,8 +42,6 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: redis-data
-        - mountPath: /etc/localtime
-          name: timezone 
     {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -62,8 +60,5 @@ spec:
       - name: redis-data
         persistentVolumeClaim:
           claimName: redis-data
-      - name: timezone
-        hostPath:
-          path: /usr/share/zoneinfo/Asia/Shanghai
 status: {}
 {{- end }}

@@ -157,9 +157,6 @@ spec:
         resources:
         {{- toYaml . | nindent 10 }}
         {{ end }}
-        volumeMounts:
-        - mountPath: /etc/localtime
-          name: timezone  
     {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -174,8 +171,4 @@ spec:
       {{ end }}
       restartPolicy: Always
       serviceAccountName: ""
-      volumes:
-      - name: timezone
-        hostPath:
-          path: /usr/share/zoneinfo/Asia/Shanghai
 status: {}
