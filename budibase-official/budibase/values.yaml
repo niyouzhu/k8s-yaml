@@ -162,10 +162,10 @@ services:
     browser: true
     port: 9000
     replicaCount: 1
-    accessKey: "" # AWS_ACCESS_KEY if using S3 or existing minio access key
-    secretKey: "" # AWS_SECRET_ACCESS_KEY if using S3 or existing minio secret
+    accessKey: "y4RIlkS0GWYcpa0r" # AWS_ACCESS_KEY if using S3 or existing minio access key
+    secretKey: "hm42k2vlDjfpQb84CUK529SQQGkFapti" # AWS_SECRET_ACCESS_KEY if using S3 or existing minio secret
     region: "" # AWS_REGION if using S3 or existing minio secret
-    url: "http://minio-service:9000" # only change if pointing to existing minio cluster or S3 and minio: false
+    url: "http://minio-oa.default.svc.cluster.local:9000" # only change if pointing to existing minio cluster or S3 and minio: false
     storage: 10Gi
     ## If defined, storageClassName: <storageClass>
     ## If set to "-", storageClassName: "", which disables dynamic provisioning
