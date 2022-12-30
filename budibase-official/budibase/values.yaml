@@ -22,6 +22,12 @@ serviceAccount:
 
 podAnnotations: {}
 
+# logAnnotations:
+#   co.elastic.logs/multiline.type: pattern
+#   co.elastic.logs/multiline.pattern: '^[[:space:]]'
+#   co.elastic.logs/multiline.negate: false
+#   co.elastic.logs/multiline.match: after
+
 podSecurityContext:
   {}
   # fsGroup: 2000
@@ -74,7 +80,7 @@ tolerations: []
 affinity: {}
 
 globals:
-  appVersion: "latest"
+  appVersion: "v2.2.9"
   budibaseEnv: PRODUCTION
   tenantFeatureFlags: "*:LICENSING,*:USER_GROUPS"
   enableAnalytics: "1"
@@ -93,11 +99,12 @@ globals:
     secret: ""
   automationMaxIterations: "200"
 
-  createSecrets: true # creates an internal API key, JWT secrets and redis password for you
+  createSecrets: false # creates an internal API key, JWT secrets and redis password for you
 
   # if createSecrets is set to false, you can hard-code your secrets here
-  internalApiKey: ""
-  jwtSecret: ""
+  internalApiKey: "n9Zv0lkJhXewccoNIqVX"
+  jwtSecret: "uRsoHwzCG17lRorNhnCY"
+  cdnUrl: ""
 
   smtp:
     enabled: false
@@ -105,10 +112,14 @@ globals:
 #  elasticApmEnabled:
 #  elasticApmSecretToken:
 #  elasticApmServerUrl:
+#  globalAgentHttpProxy:
+#  globalAgentHttpsProxy:
+#  globalAgentNoProxy:
 
 services:
   budibaseVersion: latest
   dns: cluster.local
+  # tlsRejectUnauthorized: 0
 
   proxy:
     port: 10000
@@ -175,7 +186,7 @@ services:
 # Override values in couchDB subchart
 couchdb:
   ## clusterSize is the initial size of the CouchDB cluster.
-  clusterSize: 3
+  clusterSize: 1
   allowAdminParty: false
 
   # Secret Management
