@@ -1,0 +1,37 @@
+[38;5;6m [38;5;5m09:09:55.00 [0m
+[38;5;6m [38;5;5m09:09:55.00 [0m[1mWelcome to the Bitnami minio-client container[0m
+[38;5;6m [38;5;5m09:09:55.00 [0mSubscribe to project updates by watching [1mhttps://github.com/bitnami/bitnami-docker-minio-client[0m
+[38;5;6m [38;5;5m09:09:55.00 [0mSubmit issues and feature requests at [1mhttps://github.com/bitnami/bitnami-docker-minio-client/issues[0m
+[38;5;6m [38;5;5m09:09:55.01 [0m
+[38;5;6m [38;5;5m09:09:55.01 [0m[38;5;2mINFO [0m ==> ** Starting MinIO Client setup **
+[38;5;6mminio-client [38;5;5m09:09:55.02 [0m[38;5;2mINFO [0m ==> Adding Minio host to 'mc' configuration...
+Added `minio` successfully.
+[38;5;6m [38;5;5m09:09:55.06 [0m[38;5;2mINFO [0m ==> ** MinIO Client setup finished! **
+
+[msite name= region= 
+storage_class standard= rrs=EC:2 
+# cache drives= exclude= expiry=90 quota=80 after=0 watermark_low=70 watermark_high=80 range=on commit= 
+# compression enable=off allow_encryption=off extensions=.txt,.log,.csv,.json,.tar,.xml,.bin mime_types=text/*,application/json,application/xml,binary/octet-stream 
+# etcd endpoints= path_prefix= coredns_path=/skydns client_cert= client_cert_key= 
+identity_openid display_name= config_url=https://sso.gyz.com/.well-known/openid-configuration client_id=minio-oa client_secret=0PcKGKl613xSXQbnZiv8ClPD54UAejeecUmY8NvCkTY= claim_name=role claim_userinfo=off role_policy= claim_prefix= redirect_uri=http://minio-oa.default.svc.cluster.local:9001l/oauth_callback redirect_uri_dynamic=off scopes=openid,profile,email 
+# identity_ldap server_addr= user_dn_search_base_dn= user_dn_search_filter= group_search_filter= group_search_base_dn= tls_skip_verify=off server_insecure=off server_starttls=off lookup_bind_dn= lookup_bind_password= 
+# identity_tls skip_verify=off 
+# policy_plugin url= auth_token= 
+api requests_max=0 requests_deadline=10s cluster_deadline=10s cors_allow_origin=* remote_transport_deadline=2h list_quorum=strict replication_workers=250 replication_failed_workers=8 transition_workers=100 stale_uploads_cleanup_interval=6h stale_uploads_expiry=24h delete_cleanup_interval=5m disable_odirect=off gzip_objects=off 
+heal bitrotscan=off max_sleep=1s max_io=100 
+scanner delay=10 max_wait=15s cycle=1m 
+# logger_webhook enable=off endpoint= auth_token= client_cert= client_key= queue_size=100000 
+# audit_webhook enable=off endpoint= auth_token= client_cert= client_key= queue_size=100000 
+# audit_kafka enable=off topic= brokers= sasl_username= sasl_password= sasl_mechanism=plain client_tls_cert= client_tls_key= tls_client_auth=0 sasl=off tls=off tls_skip_verify=off version= 
+# notify_webhook enable=off endpoint= auth_token= queue_limit=0 queue_dir= client_cert= client_key= 
+# notify_amqp enable=off url= exchange= exchange_type= routing_key= mandatory=off durable=off no_wait=off internal=off auto_deleted=off delivery_mode=0 publisher_confirms=off queue_limit=0 queue_dir= 
+# notify_kafka enable=off topic= brokers= sasl_username= sasl_password= sasl_mechanism=plain client_tls_cert= client_tls_key= tls_client_auth=0 sasl=off tls=off tls_skip_verify=off queue_limit=0 queue_dir= version= 
+# notify_mqtt enable=off broker= topic= password= username= qos=0 keep_alive_interval=0s reconnect_interval=0s queue_dir= queue_limit=0 
+# notify_nats enable=off address= subject= username= password= token= tls=off tls_skip_verify=off cert_authority= client_cert= client_key= ping_interval=0 streaming=off streaming_async=off streaming_max_pub_acks_in_flight=0 streaming_cluster_id= queue_dir= queue_limit=0 
+# notify_nsq enable=off nsqd_address= topic= tls=off tls_skip_verify=off queue_dir= queue_limit=0 
+# notify_mysql enable=off format=namespace dsn_string= table= queue_dir= queue_limit=0 max_open_connections=2 
+# notify_postgres enable=off format=namespace connection_string= table= queue_dir= queue_limit=0 max_open_connections=2 
+# notify_elasticsearch enable=off url= format=namespace index= queue_dir= queue_limit=0 username= password= 
+# notify_redis enable=off format=namespace address= key= password= queue_dir= queue_limit=0 
+subnet license= api_key= proxy= 
+[0mpod "minio-client" deleted
