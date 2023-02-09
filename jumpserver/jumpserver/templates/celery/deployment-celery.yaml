@@ -50,8 +50,6 @@ spec:
               value: {{ .config.debug | quote }}
             - name: LOG_LEVEL
               value: {{ .config.log.level | quote }}
-            - name: SESSION_EXPIRE_AT_BROWSER_CLOSE
-              value: "true"
             - name: HTTP_LISTEN_PORT
               value: {{ .service.web.port | quote }}
             - name: WS_LISTEN_PORT
@@ -74,9 +72,10 @@ spec:
               value: {{ include "jumpserver.redis.port" $ | quote }}
             - name: REDIS_PASSWORD
               value: {{ include "jumpserver.redis.password" $ | quote }}
-          {{- with .env }}
-            {{- tpl (toYaml .) $ | nindent 12 | quote }}
-          {{- end }}
+            {{- range $key, $val := .env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
           livenessProbe:
             exec:
               command:
@@ -90,8 +89,14 @@ spec:
               subPath: "config.yml"
             - mountPath: "/opt/jumpserver/data"
               name: "jms-core-data"
+              {{- if .persistence.subPath }}
+              subPath: {{ .persistence.subPath | quote }}
+              {{- end }}
             - mountPath: "/opt/jumpserver/logs"
               name: "jms-core-logs"
+              {{- if .persistence.subPath }}
+              subPath: {{ .persistence.subPath | quote }}
+              {{- end }}
           {{- with .volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -101,7 +106,11 @@ spec:
             name: '{{ include "jumpserver.fullname" $ }}-jms-core'
           name: "jms-core-config"
         - persistentVolumeClaim:
+            {{- if .persistence.existingClaim }}
+            claimName: {{ .persistence.existingClaim | quote }}
+            {{- else }}
             claimName: '{{ include "jumpserver.fullname" $ }}-jms-core-data'
+            {{- end }}
           name: "jms-core-data"
         - persistentVolumeClaim:
             claimName: '{{ include "jumpserver.fullname" $ }}-jms-core-logs'
