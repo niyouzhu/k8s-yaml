@@ -114,7 +114,9 @@ extraConfigs:
 extraSecrets: {}
 
 extraVolumes:
-  []
+        - name: timezone
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
   # - name: customConfig
   #   configMap:
   #     name: '{{ template "superset.fullname" . }}-custom-config'
@@ -124,7 +126,8 @@ extraVolumes:
   #     defaultMode: 0600
 
 extraVolumeMounts:
-  []
+        - name: timezone
+          mountPath: /etc/localtime
   # - name: customConfig
   #   mountPath: /mnt/config
   #   readOnly: true
@@ -135,7 +138,25 @@ extraVolumeMounts:
 # WARNING: the order is not guaranteed
 # Files can be passed as helm --set-file configOverrides.my-override=my-file.py
 configOverrides:
-  {}
+  extend_timeout: |
+     # Extend timeout to allow long running queries.
+     SUPERSET_WEBSERVER_TIMEOUT = ...
+  enable_oauth: |
+    from flask_appbuilder.security.manager import (AUTH_DB, AUTH_OAUTH, AUTH_LDAP)
+    AUTH_TYPE = AUTH_LDAP
+    AUTH_LDAP_UID_FIELD = "sAMAccountName"
+    AUTH_LDAP_SERVER = "ldap://10.1.3.20:389"
+    AUTH_LDAP_SEARCH = "DC=gyz,DC=com"
+    AUTH_LDAP_BIND_USER = "CN=ITDEVUSER1,OU=ServiceAccount,DC=gyz,DC=com"
+    AUTH_LDAP_BIND_PASSWORD = "123.com"
+    # Will allow user self registration, allowing to create Flask users from Authorized User
+    AUTH_USER_REGISTRATION = True
+    # The default user self registration role
+    AUTH_USER_REGISTRATION_ROLE = "Public"
+  secret: |
+    # Generate your own secret key for encryption. Use openssl rand -base64 42 to generate a good key
+    SECRET_KEY = '\2\1thisismyscretkey\1\2\\e\\y\\y\\h'
+
   # extend_timeout: |
   #    # Extend timeout to allow long running queries.
   #    SUPERSET_WEBSERVER_TIMEOUT = ...
