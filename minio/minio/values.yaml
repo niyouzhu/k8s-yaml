@@ -1034,6 +1034,8 @@ pdb:
 ## @section Metrics parameters
 
 metrics:
+  prometheusRule:
+    enabled: false
   ## @param metrics.prometheusAuthType Authentication mode for Prometheus (`jwt` or `public`)
   ## To allow public access without authentication for prometheus metrics set environment as follows.
   ##
