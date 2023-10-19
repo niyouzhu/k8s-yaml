@@ -64,6 +64,8 @@ spec:
           value: {{ .Values.globals.enableAnalytics | quote }}
         - name: API_ENCRYPTION_KEY
           value: {{ .Values.globals.apiEncryptionKey | quote }}
+        - name: HTTP_LOGGING
+          value: {{ .Values.services.apps.httpLogging | quote }}
         - name: INTERNAL_API_KEY
           valueFrom:
             secretKeyRef:
@@ -118,8 +120,10 @@ spec:
         {{ end }}
         - name: MULTI_TENANCY
           value: {{ .Values.globals.multiTenancy | quote }}
+        - name: OFFLINE_MODE
+          value: {{ .Values.globals.offlineMode | quote }}
         - name: LOG_LEVEL
-          value: {{ default "info" .Values.services.apps.logLevel | quote }}
+          value: {{ .Values.services.apps.logLevel | quote }}
         - name: REDIS_PASSWORD
           value: {{ .Values.services.redis.password }}
         - name: REDIS_URL
@@ -180,18 +184,6 @@ spec:
         - name: DD_APM_DD_URL
           value: https://trace.agent.datadoghq.eu
         {{ end }}
-        {{ if .Values.globals.elasticApmEnabled }}
-        - name: ELASTIC_APM_ENABLED
-          value: {{ .Values.globals.elasticApmEnabled | quote }}
-        {{ end }}
-        {{ if .Values.globals.elasticApmSecretToken }}
-        - name: ELASTIC_APM_SECRET_TOKEN
-          value: {{ .Values.globals.elasticApmSecretToken | quote }}
-        {{ end }}
-        {{ if .Values.globals.elasticApmServerUrl }}
-        - name: ELASTIC_APM_SERVER_URL
-          value: {{ .Values.globals.elasticApmServerUrl | quote }}
-        {{ end }}
         {{ if .Values.globals.globalAgentHttpProxy }}
         - name: GLOBAL_AGENT_HTTP_PROXY
           value: {{ .Values.globals.globalAgentHttpProxy | quote }}
@@ -209,27 +201,26 @@ spec:
           value: {{ .Values.services.tlsRejectUnauthorized }}
         {{ end }}
 
-        image: budibase/apps:{{ .Values.globals.appVersion }}
+        image: budibase/apps:{{ .Values.globals.appVersion | default .Chart.AppVersion }}
         imagePullPolicy: Always
+        {{- if .Values.services.apps.startupProbe }}
+        {{- with .Values.services.apps.startupProbe }}
+        startupProbe:
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.services.apps.livenessProbe }}
+        {{- with .Values.services.apps.livenessProbe }}
         livenessProbe:
-          httpGet:
-            path: /health
-            port: {{ .Values.services.apps.port }}
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          successThreshold: 1
-          failureThreshold: 3
-          timeoutSeconds: 3
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.services.apps.readinessProbe }}
+        {{- with .Values.services.apps.readinessProbe }}
         readinessProbe:
-          httpGet:
-            path: /health
-            port: {{ .Values.services.apps.port }}
-          initialDelaySeconds: 5
-          periodSeconds: 5
-          successThreshold: 1
-          failureThreshold: 3
-          timeoutSeconds: 3
-
+            {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- end }}
         name: bbapps
         ports:
         - containerPort: {{ .Values.services.apps.port }}
