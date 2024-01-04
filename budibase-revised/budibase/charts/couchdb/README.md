@@ -1,5 +1,7 @@
 # CouchDB
 
+![Version: 4.2.0](https://img.shields.io/badge/Version-4.2.0-informational?style=flat-square) ![AppVersion: 3.2.1](https://img.shields.io/badge/AppVersion-3.2.1-informational?style=flat-square)
+
 Apache CouchDB is a database featuring seamless multi-master sync, that scales
 from big data to mobile, with an intuitive HTTP/JSON API and designed for
 reliability.
@@ -16,6 +18,7 @@ storage volumes to each Pod in the Deployment.
 ```bash
 $ helm repo add couchdb https://apache.github.io/couchdb-helm
 $ helm install couchdb/couchdb \
+  --version=4.2.0 \
   --set allowAdminParty=true \
   --set couchdbConfig.couchdb.uuid=$(curl https://www.uuidgenerator.net/api/version4 2>/dev/null | tr -d -)
 ```
@@ -23,7 +26,7 @@ $ helm install couchdb/couchdb \
 ## Prerequisites
 
 - Kubernetes 1.9+ with Beta APIs enabled
-- Ingress requires Kubernetes 1.14+
+- Ingress requires Kubernetes 1.19+
 
 ## Installing the Chart
 
@@ -41,6 +44,7 @@ Afterwards install the chart replacing the UUID
 ```bash
 $ helm install \
   --name my-release \
+  --version=4.2.0 \
   --set couchdbConfig.couchdb.uuid=decafbaddecafbaddecafbaddecafbad \
   couchdb/couchdb
 ```
@@ -59,21 +63,14 @@ Secret containing `adminUsername`, `adminPassword` and `cookieAuthSecret` keys:
 $  kubectl create secret generic my-release-couchdb --from-literal=adminUsername=foo --from-literal=adminPassword=bar --from-literal=cookieAuthSecret=baz
 ```
 
-If you want to set the `adminHash` directly to achieve consistent salts between 
-different nodes you need to addionally add the key `password.ini` to the secret:
+If you want to set the `adminHash` directly to achieve consistent salts between
+different nodes you need to add it to the secret:
 
 ```bash
 $  kubectl create secret generic my-release-couchdb \
    --from-literal=adminUsername=foo \
    --from-literal=cookieAuthSecret=baz \
-   --from-file=./my-password.ini 
-```
-
-With the following contents in `my-password.ini`:
-
-```
-[admins]
-foo = <pbkdf2-hash>
+   --from-literal=adminHash=-pbkdf2-d4b887da....
 ```
 
 and then install the chart while overriding the `createAdminSecret` setting:
@@ -81,6 +78,7 @@ and then install the chart while overriding the `createAdminSecret` setting:
 ```bash
 $ helm install \
   --name my-release \
+  --version=4.2.0 \
   --set createAdminSecret=false \
   --set couchdbConfig.couchdb.uuid=decafbaddecafbaddecafbaddecafbad \
   couchdb/couchdb
@@ -111,15 +109,22 @@ incompatible breaking change needing manual actions.
 ### Upgrade to 3.0.0
 
 Since version 3.0.0 setting the CouchDB server instance UUID is mandatory.
-Therefore you need to generate a UUID and supply it as a value during the
+Therefore, you need to generate a UUID and supply it as a value during the
 upgrade as follows:
 
 ```bash
 $ helm upgrade <release-name> \
+  --version=3.6.4 \
   --reuse-values \
   --set couchdbConfig.couchdb.uuid=<UUID> \
   couchdb/couchdb
 ```
+
+### Upgrade to 4.0.0
+
+Breaking change between v3 and v4 is the `adminHash` in the secret that no longer uses
+the `password.ini`. It stores the `adminHash` only instead, make sure to change it if you
+use your own secret.
 
 ## Migrating from stable/couchdb
 
@@ -128,7 +133,7 @@ version semantics. You can upgrade directly from `stable/couchdb` to this chart 
 
 ```bash
 $ helm repo add couchdb https://apache.github.io/couchdb-helm
-$ helm upgrade my-release couchdb/couchdb
+$ helm upgrade my-release --version=4.2.0 couchdb/couchdb
 ```
 
 ## Configuration
@@ -136,17 +141,15 @@ $ helm upgrade my-release couchdb/couchdb
 The following table lists the most commonly configured parameters of the
 CouchDB chart and their default values:
 
-|           Parameter             |             Description                               |                Default                 |
-|---------------------------------|-------------------------------------------------------|----------------------------------------|
-| `clusterSize`                   | The initial number of nodes in the CouchDB cluster    | 3                                      |
-| `couchdbConfig`                 | Map allowing override elements of server .ini config  | *See below*                            |
-| `allowAdminParty`               | If enabled, start cluster without admin account       | false (requires creating a Secret)     |
-| `createAdminSecret`             | If enabled, create an admin account and cookie secret | true                                   |
-| `schedulerName`                 | Name of the k8s scheduler (other than default)        | `nil`                                  |
-| `erlangFlags`                   | Map of flags supplied to the underlying Erlang VM     | name: couchdb, setcookie: monster
-| `persistentVolume.enabled`      | Boolean determining whether to attach a PV to each node | false
-| `persistentVolume.size`         | If enabled, the size of the persistent volume to attach                          | 10Gi
-| `enableSearch`                  | Adds a sidecar for Lucene-powered text search         | false                                  |
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| allowAdminParty | bool | `false` | If allowAdminParty is enabled the cluster will start up without any database administrator account; i.e., all users will be granted administrative access. Otherwise, the system will look for a Secret called <ReleaseName>-couchdb containing `adminUsername`, `adminPassword` and `cookieAuthSecret` keys. See the `createAdminSecret` flag. ref: https://kubernetes.io/docs/concepts/configuration/secret/ |
+| clusterSize | int | `3` | the initial number of nodes in the CouchDB cluster. |
+| couchdbConfig | object | `{"chttpd":{"bind_address":"any","require_valid_user":false}}` | couchdbConfig will override default CouchDB configuration settings. The contents of this map are reformatted into a .ini file laid down by a ConfigMap object. ref: http://docs.couchdb.org/en/latest/config/index.html |
+| createAdminSecret | bool | `true` | If createAdminSecret is enabled a Secret called <ReleaseName>-couchdb will be created containing auto-generated credentials. Users who prefer to set these values themselves have a couple of options: 1) The `adminUsername`, `adminPassword`, `adminHash`, and `cookieAuthSecret`    can be defined directly in the chart's values. Note that all of a chart's    values are currently stored in plaintext in a ConfigMap in the tiller    namespace. 2) This flag can be disabled and a Secret with the required keys can be    created ahead of time. |
+| enableSearch | bool | `false` | Flip this to flag to include the Search container in each Pod |
+| erlangFlags | object | `{"name":"couchdb"}` | erlangFlags is a map that is passed to the Erlang VM as flags using the ERL_FLAGS env. The `name` flag is required to establish connectivity between cluster nodes. ref: http://erlang.org/doc/man/erl.html#init_flags |
+| persistentVolume | object | `{"accessModes":["ReadWriteOnce"],"enabled":false,"size":"10Gi"}` | The storage volume used by each Pod in the StatefulSet. If a persistentVolume is not enabled, the Pods will use `emptyDir` ephemeral local storage. Setting the storageClass attribute to "-" disables dynamic provisioning of Persistent Volumes; leaving it unset will invoke the default provisioner. |
 
 You can set the values of the `couchdbConfig` map according to the
 [official configuration][4]. The following shows the map's default values and
@@ -161,55 +164,74 @@ required options to set:
 A variety of other parameters are also configurable. See the comments in the
 `values.yaml` file for further details:
 
-|           Parameter                  |                Default                 |
-|--------------------------------------|----------------------------------------|
-| `adminUsername`                      | admin                                  |
-| `adminPassword`                      | auto-generated                         |
-| `adminHash`                          |                                        |
-| `cookieAuthSecret`                   | auto-generated                         |
-| `image.repository`                   | couchdb                                |
-| `image.tag`                          | 3.1.0                                  |
-| `image.pullPolicy`                   | IfNotPresent                           |
-| `searchImage.repository`             | kocolosk/couchdb-search                |
-| `searchImage.tag`                    | 0.1.0                                  |
-| `searchImage.pullPolicy`             | IfNotPresent                           |
-| `initImage.repository`               | busybox                                |
-| `initImage.tag`                      | latest                                 |
-| `initImage.pullPolicy`               | Always                                 |
-| `ingress.enabled`                    | false                                  |
-| `ingress.hosts`                      | chart-example.local                    |
-| `ingress.annotations`                |                                        |
-| `ingress.path`                       | /                                      |
-| `ingress.tls`                        |                                        |
-| `persistentVolume.accessModes`       | ReadWriteOnce                          |
-| `persistentVolume.storageClass`      | Default for the Kube cluster           |
-| `podManagementPolicy`                | Parallel                               |
-| `affinity`                           |                                        |
-| `annotations`                        |                                        |
-| `tolerations`                        |                                        |
-| `resources`                          |                                        |
-| `service.annotations`                |                                        |
-| `service.enabled`                    | true                                   |
-| `service.type`                       | ClusterIP                              |
-| `service.externalPort`               | 5984                                   |
-| `dns.clusterDomainSuffix`            | cluster.local                          |
-| `networkPolicy.enabled`              | true                                   |
-| `serviceAccount.enabled`             | true                                   |
-| `serviceAccount.create`              | true                                   |
-| `serviceAccount.imagePullSecrets`    |                                        |
-| `sidecars`                           | {}                                     |
-| `livenessProbe.enabled`              | true                                   |
-| `livenessProbe.failureThreshold`     | 3                                      |
-| `livenessProbe.initialDelaySeconds`  | 0                                      |
-| `livenessProbe.periodSeconds`        | 10                                     |
-| `livenessProbe.successThreshold`     | 1                                      |
-| `livenessProbe.timeoutSeconds`       | 1                                      |
-| `readinessProbe.enabled`             | true                                   |
-| `readinessProbe.failureThreshold`    | 3                                      |
-| `readinessProbe.initialDelaySeconds` | 0                                      |
-| `readinessProbe.periodSeconds`       | 10                                     |
-| `readinessProbe.successThreshold`    | 1                                      |
-| `readinessProbe.timeoutSeconds`      | 1                                      |
+
+| Parameter                              | Default                                          |
+| -------------------------------------- | ------------------------------------------------ |
+| `adminUsername`                        | admin                                            |
+| `adminPassword`                        | auto-generated                                   |
+| `adminHash`                            |                                                  |
+| `cookieAuthSecret`                     | auto-generated                                   |
+| `image.repository`                     | couchdb                                          |
+| `image.tag`                            | 3.2.1                                            |
+| `image.pullPolicy`                     | IfNotPresent                                     |
+| `searchImage.repository`               | kocolosk/couchdb-search                          |
+| `searchImage.tag`                      | 0.1.0                                            |
+| `searchImage.pullPolicy`               | IfNotPresent                                     |
+| `initImage.repository`                 | busybox                                          |
+| `initImage.tag`                        | latest                                           |
+| `initImage.pullPolicy`                 | Always                                           |
+| `ingress.enabled`                      | false                                            |
+| `ingress.className`                    |                                                  |
+| `ingress.hosts`                        | chart-example.local                              |
+| `ingress.annotations`                  |                                                  |
+| `ingress.path`                         | /                                                |
+| `ingress.tls`                          |                                                  |
+| `persistentVolume.accessModes`         | ReadWriteOnce                                    |
+| `persistentVolume.storageClass`        | Default for the Kube cluster                     |
+| `persistentVolume.annotations`         | {}                                               |
+| `persistentVolume.existingClaims`      | [] (a list of existing PV/PVC volume value objects with `volumeName`, `claimName`, `persistentVolumeName` and `volumeSource` defined)                                                                |
+| `persistentVolume.volumeName`          |                                                  |
+| `persistentVolume.claimName`           |                                                  |
+| `persistentVolume.volumeSource`        |                                                  |
+| `podManagementPolicy`                  | Parallel                                         |
+| `affinity`                             |                                                  |
+| `topologySpreadConstraints`            |                                                  |
+| `annotations`                          |                                                  |
+| `tolerations`                          |                                                  |
+| `resources`                            |                                                  |
+| `autoSetup.enabled`                    | false (if set to true, must have `service.enabled` set to true and a correct `adminPassword` - deploy it with the `--wait` flag to avoid first jobs failure)                                         |
+| `autoSetup.image.repository`           | curlimages/curl                                  |
+| `autoSetup.image.tag`                  | latest                                           |
+| `autoSetup.image.pullPolicy`           | Always                                           |
+| `autoSetup.defaultDatabases`           | [`_global_changes`]                              |
+| `service.annotations`                  |                                                  |
+| `service.enabled`                      | true                                             |
+| `service.type`                         | ClusterIP                                        |
+| `service.externalPort`                 | 5984                                             |
+| `dns.clusterDomainSuffix`              | cluster.local                                    |
+| `networkPolicy.enabled`                | true                                             |
+| `serviceAccount.enabled`               | true                                             |
+| `serviceAccount.create`                | true                                             |
+| `serviceAccount.imagePullSecrets`      |                                                  |
+| `sidecars`                             | {}                                               |
+| `livenessProbe.enabled`                | true                                             |
+| `livenessProbe.failureThreshold`       | 3                                                |
+| `livenessProbe.initialDelaySeconds`    | 0                                                |
+| `livenessProbe.periodSeconds`          | 10                                               |
+| `livenessProbe.successThreshold`       | 1                                                |
+| `livenessProbe.timeoutSeconds`         | 1                                                |
+| `readinessProbe.enabled`               | true                                             |
+| `readinessProbe.failureThreshold`      | 3                                                |
+| `readinessProbe.initialDelaySeconds`   | 0                                                |
+| `readinessProbe.periodSeconds`         | 10                                               |
+| `readinessProbe.successThreshold`      | 1                                                |
+| `readinessProbe.timeoutSeconds`        | 1                                                |
+| `prometheusPort.enabled`               | false                                            |
+| `prometheusPort.port`                  | 17896                                            |
+| `prometheusPort.bind_address`          | 0.0.0.0                                          |
+| `placementConfig.enabled`              | false                                            |
+| `placementConfig.image.repository`     | caligrafix/couchdb-autoscaler-placement-manager  |
+| `placementConfig.image.tag`            | 0.1.0                                            |
 
 ## Feedback, Issues, Contributing
 

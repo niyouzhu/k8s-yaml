@@ -2,12 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.21.0 (992df58d8)
 {{ if .Values.services.apps.deploymentAnnotations }}
 {{- toYaml .Values.services.apps.deploymentAnnotations | indent 4 -}}
 {{ end }}
-  creationTimestamp: null
   labels:
     io.kompose.service: app-service
 {{ if .Values.services.apps.deploymentLabels }}
@@ -24,12 +21,9 @@ spec:
   template:
     metadata:
       annotations:
-        kompose.cmd: kompose convert
-        kompose.version: 1.21.0 (992df58d8)
 {{ if .Values.services.apps.templateAnnotations }}
 {{- toYaml .Values.services.apps.templateAnnotations | indent 8 -}}
 {{ end }}
-      creationTimestamp: null
       labels:
         io.kompose.service: app-service
 {{ if .Values.services.apps.templateLabels }}
@@ -134,8 +128,6 @@ spec:
           {{ end }}
         - name: SELF_HOSTED
           value: {{ .Values.globals.selfHosted | quote }}
-        - name: SENTRY_DSN
-          value: {{ .Values.globals.sentryDSN | quote }}
         - name: POSTHOG_TOKEN
           value: {{ .Values.globals.posthogToken | quote }}
         - name: WORKER_URL
@@ -200,7 +192,14 @@ spec:
         - name: NODE_TLS_REJECT_UNAUTHORIZED
           value: {{ .Values.services.tlsRejectUnauthorized }}
         {{ end }}
-
+        {{- if .Values.services.automationWorkers.enabled }}
+        - name: APP_FEATURES
+          value: "api"
+        {{- end }}
+        {{- range .Values.services.apps.extraEnv }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+        {{- end }}
         image: budibase/apps:{{ .Values.globals.appVersion | default .Chart.AppVersion }}
         imagePullPolicy: Always
         {{- if .Values.services.apps.startupProbe }}
@@ -227,6 +226,14 @@ spec:
         {{ with .Values.services.apps.resources }}
         resources:
         {{- toYaml . | nindent 10 }}
+        {{ end }}
+        {{ if .Values.services.apps.command }}
+        command:
+        {{- toYaml .Values.services.apps.command | nindent 10 }}
+        {{ end }}
+        {{ if .Values.services.apps.args }}
+        args:
+        {{- toYaml .Values.services.apps.args | nindent 10 }}
         {{ end }}
     {{- with .Values.affinity }}
       affinity:

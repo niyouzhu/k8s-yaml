@@ -1,14 +1,7 @@
-image:
-  pullPolicy: IfNotPresent
-  tag: ""
 # -- Passed to all pods created by this chart. Should not ordinarily need to be changed.
 imagePullSecrets: []
 # -- Override the name of the deploymen. Defaults to {{ .Chart.Name }}.
 nameOverride: ""
-nodeSelector: {}
-podAnnotations: {}
-podSecurityContext: {}
-securityContext: {}
 
 serviceAccount:
   # -- Specifies whether a service account should be created
@@ -42,12 +35,11 @@ ingress:
               name: proxy-service
               port:
                 number: 10000
-  nginx: true
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/client-max-body-size: 150M
-    nginx.ingress.kubernetes.io/proxy-body-size: 50m
-  aws: false
+
+awsAlbIngress:
+  # -- Whether to create an ALB Ingress resource pointing to the Budibase proxy. Requires the AWS ALB Ingress Controller.
+  enabled: false
+  # -- If you're wanting to use HTTPS, you'll need to create an ACM certificate and specify the ARN here.
   certificateArn: ""
 
 # -- Sets the tolerations for all pods created by this chart. Should not ordinarily need to be changed.
@@ -75,7 +67,7 @@ globals:
   # <https://docs.budibase.com/docs/analytics>.
   enableAnalytics: "1"
   # @ignore (only used if enableAnalytics is set to 1)
-  posthogToken: phc_bIjZL7oh2GEUd2vqvTBH8WvrX0fWTFQMs6H5KQxiUxU
+  posthogToken: "phc_bIjZL7oh2GEUd2vqvTBH8WvrX0fWTFQMs6H5KQxiUxU"
   # @ignore (should not normally need to be changed, we only set this to "0"
   # when deploying to our Cloud environment)
   selfHosted: "1"
@@ -84,7 +76,6 @@ globals:
   # @ignore (only currently used to determine whether to fetch licenses offline or not, should
   # not normally need to be changed, and only applies to Enterprise customers)
   offlineMode: "0"
-  cdnUrl: ""
   # @ignore (only needs to be set in our cloud environment)
   accountPortalUrl: ""
   # @ignore (only needs to be set in our cloud environment)
@@ -122,6 +113,7 @@ globals:
   internalApiKey: "n9Zv0lkJhXewccoNIqVX"
   # -- Secret used for signing JWTs. You don't need to set this if `createSecrets` is true.
   jwtSecret: "uRsoHwzCG17lRorNhnCY"
+
   # -- A fallback value for `internalApiKey`. If you're rotating your encryption key, you can
   # set this to the old value for the duration of the rotation.
   internalApiKeyFallback: ""
@@ -129,10 +121,19 @@ globals:
   # to the old value for the duration of the rotation.
   jwtSecretFallback: ""
 
-  sentryDSN: ""
   smtp:
     # -- Whether to enable SMTP or not.
     enabled: false
+    # -- The hostname of your SMTP server.
+    host: ""
+    # -- The port of your SMTP server.
+    port: "587"
+    # -- The email address to use in the "From:" field of emails sent by Budibase.
+    from: ""
+    # -- The username to use when authenticating with your SMTP server.
+    user: ""
+    # -- The password to use when authenticating with your SMTP server.
+    password: ""
 
 services:
   # -- The DNS suffix to use for service discovery. You only need to change this
@@ -146,14 +147,13 @@ services:
     replicaCount: 1
     # @ignore (you should never need to change this)
     upstreams:
-      apps: http://app-service.{{ .Release.Namespace }}.svc.{{ .Values.services.dns
-        }}:{{ .Values.services.apps.port }}
-      couchdb: http://{{ .Release.Name }}-svc-couchdb:{{ .Values.services.couchdb.port
-        }}
-      minio: http://minio-service.{{ .Release.Namespace }}.svc.{{ .Values.services.dns
-        }}:{{ .Values.services.objectStore.port }}
-      worker: http://worker-service.{{ .Release.Namespace }}.svc.{{ .Values.services.dns
-        }}:{{ .Values.services.worker.port }}
+      apps: "http://app-service.{{ .Release.Namespace }}.svc.{{ .Values.services.dns }}:{{ .Values.services.apps.port }}"
+      worker: "http://worker-service.{{ .Release.Namespace }}.svc.{{ .Values.services.dns }}:{{ .Values.services.worker.port }}"
+      minio: "http://minio-service.{{ .Release.Namespace }}.svc.{{ .Values.services.dns }}:{{ .Values.services.objectStore.port }}"
+      couchdb: "http://{{ .Release.Name }}-svc-couchdb:{{ .Values.services.couchdb.port }}"
+    # -- The resources to use for proxy pods. See
+    # <https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/>
+    # for more information on how to set these.
     resources: {}
     # -- Startup probe configuration for proxy pods. You shouldn't need to
     # change this, but if you want to you can find more information here:
@@ -197,6 +197,16 @@ services:
       failureThreshold: 3
       # @ignore
       periodSeconds: 5
+    autoscaling:
+      # -- Whether to enable horizontal pod autoscaling for the proxy service.
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 10
+      # -- Target CPU utilization percentage for the proxy service. Note that
+      # for autoscaling to work, you will need to have metrics-server
+      # configured, and resources set for the proxy pods.
+      targetCPUUtilizationPercentage: 80
+
   apps:
     # @ignore (you shouldn't need to change this)
     port: 4002
@@ -239,6 +249,12 @@ services:
         scheme: HTTP
       # @ignore
       periodSeconds: 3
+      # @ignore
+      failureThreshold: 1
+    # -- Liveness probe configuration for apps pods. You shouldn't need to
+    # change this, but if you want to you can find more information here:
+    # <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+    # @default -- HTTP health checks.
     livenessProbe:
       # @ignore
       httpGet:
@@ -249,9 +265,87 @@ services:
       failureThreshold: 3
       # @ignore
       periodSeconds: 5
+    autoscaling:
+      # -- Whether to enable horizontal pod autoscaling for the apps service.
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 10
+      # -- Target CPU utilization percentage for the apps service. Note that for
+      # autoscaling to work, you will need to have metrics-server configured,
+      # and resources set for the apps pods.
+      targetCPUUtilizationPercentage: 80
 
-
-  budibaseVersion: latest
+  automationWorkers:
+    # -- Whether or not to enable the automation worker service. If you disable this,
+    # automations will be processed by the apps service.
+    enabled: true
+    # @ignore (you shouldn't need to change this)
+    port: 4002
+    # -- The number of automation worker replicas to run.
+    replicaCount: 1
+    # -- The log level for the automation worker service.
+    logLevel: info
+    # -- The resources to use for automation worker pods. See
+    # <https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/>
+    # for more information on how to set these.
+    resources: {}
+    # -- Extra environment variables to set for automation worker pods. Takes a list of
+    # name=value pairs.
+    extraEnv: []
+    # -- Startup probe configuration for automation worker pods. You shouldn't
+    # need to change this, but if you want to you can find more information
+    # here:
+    # <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+    # @default -- HTTP health checks.
+    startupProbe:
+      # @ignore
+      httpGet:
+        path: /health
+        port: 4002
+        scheme: HTTP
+      # @ignore
+      failureThreshold: 30
+      # @ignore
+      periodSeconds: 3
+    # -- Readiness probe configuration for automation worker pods. You shouldn't
+    # need to change this, but if you want to you can find more information
+    # here:
+    # <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+    # @default -- HTTP health checks.
+    readinessProbe:
+      # @ignore
+      httpGet:
+        path: /health
+        port: 4002
+        scheme: HTTP
+      # @ignore
+      periodSeconds: 3
+      # @ignore
+      failureThreshold: 1
+    # -- Liveness probe configuration for automation worker pods. You shouldn't
+    # need to change this, but if you want to you can find more information
+    # here:
+    # <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
+    # @default -- HTTP health checks.
+    livenessProbe:
+      # @ignore
+      httpGet:
+        path: /health
+        port: 4002
+        scheme: HTTP
+      # @ignore
+      failureThreshold: 3
+      # @ignore
+      periodSeconds: 30
+    autoscaling:
+      # -- Whether to enable horizontal pod autoscaling for the apps service.
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 10
+      # -- Target CPU utilization percentage for the automation worker service.
+      # Note that for autoscaling to work, you will need to have metrics-server
+      # configured, and resources set for the automation worker pods.
+      targetCPUUtilizationPercentage: 80
 
   worker:
     # @ignore (you shouldn't need to change this)
@@ -266,6 +360,9 @@ services:
     # <https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/>
     # for more information on how to set these.
     resources: {}
+    # -- Extra environment variables to set for worker pods. Takes a list of
+    # name=value pairs.
+    extraEnv: []
     # -- Startup probe configuration for worker pods. You shouldn't need to
     # change this, but if you want to you can find more information here:
     # <https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/>
@@ -308,10 +405,15 @@ services:
       failureThreshold: 3
       # @ignore
       periodSeconds: 5
-
-
-
-
+    autoscaling:
+      # -- Whether to enable horizontal pod autoscaling for the worker service.
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 10
+      # -- Target CPU utilization percentage for the worker service. Note that
+      # for autoscaling to work, you will need to have metrics-server
+      # configured, and resources set for the worker pods.
+      targetCPUUtilizationPercentage: 80
 
   couchdb:
     # -- Whether or not to spin up a CouchDB instance in your cluster. True by
@@ -336,8 +438,6 @@ services:
       # <https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/>
       # for more information on how to set these.
       resources: {}
-
-
 
   redis:
     # -- Whether or not to deploy a Redis pod into your cluster.
@@ -420,394 +520,20 @@ couchdb:
   # can't guarantee that Budibase will work.
   image:
     # @ignore
-    repository: couchdb
+    repository: budibase/couchdb
     # @ignore
-    tag: 3.1.1
+    tag: v3.2.1
     # @ignore
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
   # @ignore
   # This should remain false. We ship Clouseau ourselves as part of the
   # budibase/couchdb image, and it's not possible to disable it because it's a
   # core part of the Budibase experience.
-  enableSearch: true
+  enableSearch: false
+
   couchdbConfig:
     couchdb:
       # -- Unique identifier for this CouchDB server instance. You shouldn't need
       # to change this.
       uuid: budibase-couchdb
-    chttpd:
-      bind_address: any
-      require_valid_user: false
-  adminUsername: admin
-  affinity: {}
-  allowAdminParty: false
-  annotations: {}
-
-
-
-  createAdminSecret: true
-  dns:
-    clusterDomainSuffix: cluster.local
-
-  erlangFlags:
-    name: couchdb
-    setcookie: monster
-  global: {}
-
-  ingress:
-    annotations: []
-    enabled: false
-    hosts:
-    - chart-example.local
-    path: /
-    tls: null
-  initImage:
-    pullPolicy: Always
-    repository: busybox
-    tag: latest
-  livenessProbe:
-    enabled: true
-    failureThreshold: 3
-    initialDelaySeconds: 0
-    periodSeconds: 10
-    successThreshold: 1
-    timeoutSeconds: 1
-  networkPolicy:
-    enabled: true
-  persistentVolume:
-    accessModes:
-    - ReadWriteOnce
-    enabled: false
-    size: 10Gi
-    storageClass: ""
-  podManagementPolicy: Parallel
-  readinessProbe:
-    enabled: true
-    failureThreshold: 3
-    initialDelaySeconds: 0
-    periodSeconds: 10
-    successThreshold: 1
-    timeoutSeconds: 1
-  resources: {}
-  searchImage:
-    pullPolicy: IfNotPresent
-    repository: kocolosk/couchdb-search
-    tag: 0.2.0
-  service:
-    enabled: true
-    externalPort: 5984
-    type: ClusterIP
-  serviceAccount:
-    create: true
-    enabled: true
-  sidecars: {}
-  tolerations: []
-ingress-nginx:
-  controller:
-    addHeaders: {}
-    admissionWebhooks:
-      annotations: {}
-      certificate: /usr/local/certificates/cert
-      createSecretJob:
-        resources: {}
-      enabled: true
-      existingPsp: ""
-      failurePolicy: Fail
-      key: /usr/local/certificates/key
-      labels: {}
-      namespaceSelector: {}
-      objectSelector: {}
-      patch:
-        enabled: true
-        image:
-          digest: sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
-          image: ingress-nginx/kube-webhook-certgen
-          pullPolicy: IfNotPresent
-          registry: k8s.gcr.io
-          tag: v1.1.1
-        labels: {}
-        nodeSelector:
-          kubernetes.io/os: linux
-        podAnnotations: {}
-        priorityClassName: ""
-        runAsUser: 2000
-        tolerations: []
-      patchWebhookJob:
-        resources: {}
-      port: 8443
-      service:
-        annotations: {}
-        externalIPs: []
-        loadBalancerSourceRanges: []
-        servicePort: 443
-        type: ClusterIP
-    affinity: {}
-    allowSnippetAnnotations: true
-    annotations: {}
-    autoscaling:
-      behavior: {}
-      enabled: false
-      maxReplicas: 11
-      minReplicas: 1
-      targetCPUUtilizationPercentage: 50
-      targetMemoryUtilizationPercentage: 50
-    autoscalingTemplate: []
-    config: {}
-    configAnnotations: {}
-    configMapNamespace: ""
-    containerName: controller
-    containerPort:
-      http: 80
-      https: 443
-    customTemplate:
-      configMapKey: ""
-      configMapName: ""
-    dnsConfig: {}
-    dnsPolicy: ClusterFirst
-    electionID: ingress-controller-leader
-    enableMimalloc: true
-    existingPsp: ""
-    extraArgs: {}
-    extraContainers: []
-    extraEnvs: []
-    extraInitContainers: []
-    extraVolumeMounts: []
-    extraVolumes: []
-    healthCheckHost: ""
-    healthCheckPath: /healthz
-    hostNetwork: false
-    hostPort:
-      enabled: false
-      ports:
-        http: 80
-        https: 443
-    hostname: {}
-    image:
-      allowPrivilegeEscalation: true
-      digest: sha256:f766669fdcf3dc26347ed273a55e754b427eb4411ee075a53f30718b4499076a
-      image: ingress-nginx/controller
-      pullPolicy: IfNotPresent
-      registry: k8s.gcr.io
-      runAsUser: 101
-      tag: v1.1.0
-    ingressClassByName: false
-    ingressClassResource:
-      controllerValue: k8s.io/ingress-nginx
-      default: false
-      enabled: true
-      name: nginx
-      parameters: {}
-    keda:
-      apiVersion: keda.sh/v1alpha1
-      behavior: {}
-      cooldownPeriod: 300
-      enabled: false
-      maxReplicas: 11
-      minReplicas: 1
-      pollingInterval: 30
-      restoreToOriginalReplicaCount: false
-      scaledObject:
-        annotations: {}
-      triggers: []
-    kind: Deployment
-    labels: {}
-    lifecycle:
-      preStop:
-        exec:
-          command:
-          - /wait-shutdown
-    livenessProbe:
-      failureThreshold: 5
-      httpGet:
-        path: /healthz
-        port: 10254
-        scheme: HTTP
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 1
-    maxmindLicenseKey: ""
-    metrics:
-      enabled: false
-      port: 10254
-      prometheusRule:
-        additionalLabels: {}
-        enabled: false
-        rules: []
-      service:
-        annotations: {}
-        externalIPs: []
-        loadBalancerSourceRanges: []
-        servicePort: 10254
-        type: ClusterIP
-      serviceMonitor:
-        additionalLabels: {}
-        enabled: false
-        metricRelabelings: []
-        namespace: ""
-        namespaceSelector: {}
-        relabelings: []
-        scrapeInterval: 30s
-        targetLabels: []
-    minAvailable: 1
-    minReadySeconds: 0
-    name: controller
-    nodeSelector:
-      kubernetes.io/os: linux
-    podAnnotations: {}
-    podLabels: {}
-    podSecurityContext: {}
-    priorityClassName: ""
-    proxySetHeaders: {}
-    publishService:
-      enabled: true
-      pathOverride: ""
-    readinessProbe:
-      failureThreshold: 3
-      httpGet:
-        path: /healthz
-        port: 10254
-        scheme: HTTP
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 1
-    replicaCount: 1
-    reportNodeInternalIp: false
-    resources:
-      requests:
-        cpu: 100m
-        memory: 90Mi
-    scope:
-      enabled: false
-      namespace: ""
-      namespaceSelector: ""
-    service:
-      annotations: {}
-      appProtocol: true
-      enableHttp: true
-      enableHttps: true
-      enabled: true
-      external:
-        enabled: true
-      externalIPs: []
-      internal:
-        annotations: {}
-        enabled: false
-        loadBalancerSourceRanges: []
-      ipFamilies:
-      - IPv4
-      ipFamilyPolicy: SingleStack
-      labels: {}
-      loadBalancerSourceRanges: []
-      nodePorts:
-        http: ""
-        https: ""
-        tcp: {}
-        udp: {}
-      ports:
-        http: 80
-        https: 443
-      targetPorts:
-        http: http
-        https: https
-      type: LoadBalancer
-    sysctls: {}
-    tcp:
-      annotations: {}
-      configMapNamespace: ""
-    terminationGracePeriodSeconds: 300
-    tolerations: []
-    topologySpreadConstraints: []
-    udp:
-      annotations: {}
-      configMapNamespace: ""
-    updateStrategy: {}
-    watchIngressWithoutClass: false
-  defaultBackend:
-    affinity: {}
-    autoscaling:
-      annotations: {}
-      enabled: false
-      maxReplicas: 2
-      minReplicas: 1
-      targetCPUUtilizationPercentage: 50
-      targetMemoryUtilizationPercentage: 50
-    containerSecurityContext: {}
-    enabled: false
-    existingPsp: ""
-    extraArgs: {}
-    extraEnvs: []
-    extraVolumeMounts: []
-    extraVolumes: []
-    image:
-      allowPrivilegeEscalation: false
-      image: defaultbackend-amd64
-      pullPolicy: IfNotPresent
-      readOnlyRootFilesystem: true
-      registry: k8s.gcr.io
-      runAsNonRoot: true
-      runAsUser: 65534
-      tag: "1.5"
-    labels: {}
-    livenessProbe:
-      failureThreshold: 3
-      initialDelaySeconds: 30
-      periodSeconds: 10
-      successThreshold: 1
-      timeoutSeconds: 5
-    minAvailable: 1
-    name: defaultbackend
-    nodeSelector:
-      kubernetes.io/os: linux
-    podAnnotations: {}
-    podLabels: {}
-    podSecurityContext: {}
-    port: 8080
-    priorityClassName: ""
-    readinessProbe:
-      failureThreshold: 6
-      initialDelaySeconds: 0
-      periodSeconds: 5
-      successThreshold: 1
-      timeoutSeconds: 5
-    replicaCount: 1
-    resources: {}
-    service:
-      annotations: {}
-      externalIPs: []
-      loadBalancerSourceRanges: []
-      servicePort: 80
-      type: ClusterIP
-    serviceAccount:
-      automountServiceAccountToken: true
-      create: true
-      name: ""
-    tolerations: []
-  global: {}
-  imagePullSecrets: []
-  podSecurityPolicy:
-    enabled: false
-  rbac:
-    create: true
-    scope: false
-  revisionHistoryLimit: 10
-  serviceAccount:
-    automountServiceAccountToken: true
-    create: true
-    name: ""
-  tcp: {}
-  udp: {}
-
-
-
-autoscaling:
-  enabled: false
-  maxReplicas: 100
-  minReplicas: 1
-  targetCPUUtilizationPercentage: 80
-
-
-
-
