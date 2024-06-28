@@ -157,8 +157,8 @@ services:
   couchdb:
     enabled: true
     # url: "" # only change if pointing to existing couch server
-    # user: "" # only change if pointing to existing couch server
-    # password: "" # only change if pointing to existing couch server
+    user: "admin" # only change if pointing to existing couch server
+    password: "5Az88XfChKHPgHkgUm4X" # only change if pointing to existing couch server
     port: 5984
     backup:
       enabled: false
@@ -216,8 +216,8 @@ couchdb:
   # Secret Management
   createAdminSecret: true
 
-  # adminUsername: budibase
-  # adminPassword: budibase
+  adminUsername: admin
+  adminPassword: 5Az88XfChKHPgHkgUm4X
   # adminHash: -pbkdf2-this_is_not_necessarily_secure_either
   # cookieAuthSecret: admin
 
