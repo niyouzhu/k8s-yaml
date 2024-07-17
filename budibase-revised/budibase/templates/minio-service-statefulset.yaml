@@ -80,17 +80,17 @@ spec:
         labels:
       spec:
         accessModes:
-        {{- range .Values.persistentVolume.accessModes }}
+        {{- range .Values.objectStore.persistentVolume.accessModes }}
           - {{ . | quote }}
         {{- end }}
         resources:
           requests:
-            storage: {{ .Values.persistentVolume.size | quote }}
-      {{- if .Values.persistentVolume.storageClass }}
-      {{- if (eq "-" .Values.persistentVolume.storageClass) }}
+            storage: {{ .Values.objectStore.persistentVolume.size | quote }}
+      {{- if .Values.objectStore.persistentVolume.storageClass }}
+      {{- if (eq "-" .Values.objectStore.persistentVolume.storageClass) }}
         storageClassName: ""
       {{- else }}
-        storageClassName: "{{ .Values.persistentVolume.storageClass }}"
+        storageClassName: "{{ .Values.objectStore.persistentVolume.storageClass }}"
       {{- end }}
       {{- end }}          
 {{- end }}
