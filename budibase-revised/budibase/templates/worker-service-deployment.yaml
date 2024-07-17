@@ -2,9 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.21.0 (992df58d8)
 {{ if .Values.services.worker.deploymentAnnotations }}
 {{- toYaml .Values.services.worker.deploymentAnnotations | indent 4 -}}
 {{ end }}
+  creationTimestamp: null
   labels:
     io.kompose.service: worker-service
 {{ if .Values.services.worker.deploymentLabels }}
@@ -21,9 +24,12 @@ spec:
   template:
     metadata:
       annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.21.0 (992df58d8)
 {{ if .Values.services.worker.templateAnnotations }}
 {{- toYaml .Values.services.worker.templateAnnotations | indent 8 -}}
 {{ end }}
+      creationTimestamp: null
       labels:
         io.kompose.service: worker-service
 {{ if .Values.services.worker.templateLabels }}
@@ -58,8 +64,6 @@ spec:
           {{ end }}
         - name: API_ENCRYPTION_KEY
           value: {{ .Values.globals.apiEncryptionKey | quote }}
-        - name: HTTP_LOGGING
-          value: {{ .Values.services.worker.httpLogging | quote }}
         - name: INTERNAL_API_KEY
           valueFrom:
             secretKeyRef:
@@ -110,10 +114,8 @@ spec:
           value: {{ .Values.services.worker.port | quote }}
         - name: MULTI_TENANCY
           value: {{ .Values.globals.multiTenancy | quote }}
-        - name: OFFLINE_MODE
-          value: {{ .Values.globals.offlineMode | quote }}
         - name: LOG_LEVEL
-          value: {{ .Values.services.worker.logLevel | quote }}
+          value: {{ default "info" .Values.services.worker.logLevel | quote }}
         - name: REDIS_PASSWORD
           value: {{ .Values.services.redis.password | quote }}
         - name: REDIS_URL
@@ -124,6 +126,8 @@ spec:
           {{ end }}
         - name: SELF_HOSTED
           value: {{ .Values.globals.selfHosted | quote }}
+        - name: SENTRY_DSN
+          value: {{ .Values.globals.sentryDSN }}
         - name: ENABLE_ANALYTICS
           value: {{ .Values.globals.enableAnalytics | quote }}
         - name: POSTHOG_TOKEN
@@ -166,6 +170,18 @@ spec:
         - name: DD_APM_DD_URL
           value: https://trace.agent.datadoghq.eu
         {{ end }}
+        {{ if .Values.globals.elasticApmEnabled }}
+        - name: ELASTIC_APM_ENABLED
+          value: {{ .Values.globals.elasticApmEnabled | quote }}
+        {{ end }}
+        {{ if .Values.globals.elasticApmSecretToken }}
+        - name: ELASTIC_APM_SECRET_TOKEN
+          value: {{ .Values.globals.elasticApmSecretToken | quote }}
+        {{ end }}
+        {{ if .Values.globals.elasticApmServerUrl }}
+        - name: ELASTIC_APM_SERVER_URL
+          value: {{ .Values.globals.elasticApmServerUrl | quote }}
+        {{ end }}
         {{ if .Values.globals.globalAgentHttpProxy }}
         - name: GLOBAL_AGENT_HTTP_PROXY
           value: {{ .Values.globals.globalAgentHttpProxy | quote }}
@@ -182,44 +198,33 @@ spec:
         - name: NODE_TLS_REJECT_UNAUTHORIZED
           value: {{ .Values.services.tlsRejectUnauthorized }}
         {{ end }}
-        {{- range .Values.services.worker.extraEnv }}
-        - name: {{ .name }}
-          value: {{ .value | quote }}
-        {{- end }}
-        image: budibase/worker:{{ .Values.globals.appVersion | default .Chart.AppVersion }}
+
+        image: dhub.kubesre.xyz/budibase/worker:{{ .Values.globals.appVersion }}
         imagePullPolicy: Always
-        {{- if .Values.services.worker.startupProbe }}
-        {{- with .Values.services.worker.startupProbe }}
-        startupProbe:
-            {{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{- end }}
-        {{- if .Values.services.worker.livenessProbe }}
-        {{- with .Values.services.worker.livenessProbe }}
         livenessProbe:
-            {{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{- end }}
-        {{- if .Values.services.worker.readinessProbe }}
-        {{- with .Values.services.worker.readinessProbe }}
+          httpGet:
+            path: /health
+            port: {{ .Values.services.worker.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          timeoutSeconds: 3
         readinessProbe:
-            {{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{- end }}
+          httpGet:
+            path: /health
+            port: {{ .Values.services.worker.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          timeoutSeconds: 3
         name: bbworker
         ports:
         - containerPort: {{ .Values.services.worker.port }}
         {{ with .Values.services.worker.resources }}
         resources:
         {{- toYaml . | nindent 10 }}
-        {{ end }}
-        {{ if .Values.services.worker.command }}
-        command:
-        {{- toYaml .Values.services.worker.command | nindent 10 }}
-        {{ end }}
-        {{ if .Values.services.worker.args }}
-        args:
-        {{- toYaml .Values.services.worker.args | nindent 10 }}
         {{ end }}
     {{- with .Values.affinity }}
       affinity:

@@ -1,12 +1,13 @@
 {{- if .Values.services.objectStore.minio }}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     io.kompose.service: minio-service
   name: minio-service
 spec:
   replicas: 1
+  serviceName: minio-service
   selector:
     matchLabels:
       io.kompose.service: minio-service
@@ -35,8 +36,8 @@ spec:
               name: {{ template "budibase.fullname" . }}
               key: objectStoreSecret
 
-        image: minio/minio
-        imagePullPolicy: ""
+        image: dhub.kubesre.xyz/minio/minio
+        imagePullPolicy: {{ .Values.initImage.pullPolicy }}
         livenessProbe:
           httpGet:
             path: /minio/health/live
@@ -75,5 +76,23 @@ spec:
       - name: minio-data
         persistentVolumeClaim:
           claimName: minio-data
-status: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: minio-data
+        labels:
+      spec:
+        accessModes:
+        {{- range .Values.persistentVolume.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistentVolume.size | quote }}
+      {{- if .Values.persistentVolume.storageClass }}
+      {{- if (eq "-" .Values.persistentVolume.storageClass) }}
+        storageClassName: ""
+      {{- else }}
+        storageClassName: "{{ .Values.persistentVolume.storageClass }}"
+      {{- end }}
+      {{- end }}          
 {{- end }}

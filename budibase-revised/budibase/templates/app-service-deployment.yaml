@@ -2,9 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.21.0 (992df58d8)
 {{ if .Values.services.apps.deploymentAnnotations }}
 {{- toYaml .Values.services.apps.deploymentAnnotations | indent 4 -}}
 {{ end }}
+  creationTimestamp: null
   labels:
     io.kompose.service: app-service
 {{ if .Values.services.apps.deploymentLabels }}
@@ -21,9 +24,12 @@ spec:
   template:
     metadata:
       annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.21.0 (992df58d8)
 {{ if .Values.services.apps.templateAnnotations }}
 {{- toYaml .Values.services.apps.templateAnnotations | indent 8 -}}
 {{ end }}
+      creationTimestamp: null
       labels:
         io.kompose.service: app-service
 {{ if .Values.services.apps.templateLabels }}
@@ -58,8 +64,6 @@ spec:
           value: {{ .Values.globals.enableAnalytics | quote }}
         - name: API_ENCRYPTION_KEY
           value: {{ .Values.globals.apiEncryptionKey | quote }}
-        - name: HTTP_LOGGING
-          value: {{ .Values.services.apps.httpLogging | quote }}
         - name: INTERNAL_API_KEY
           valueFrom:
             secretKeyRef:
@@ -114,10 +118,8 @@ spec:
         {{ end }}
         - name: MULTI_TENANCY
           value: {{ .Values.globals.multiTenancy | quote }}
-        - name: OFFLINE_MODE
-          value: {{ .Values.globals.offlineMode | quote }}
         - name: LOG_LEVEL
-          value: {{ .Values.services.apps.logLevel | quote }}
+          value: {{ default "info" .Values.services.apps.logLevel | quote }}
         - name: REDIS_PASSWORD
           value: {{ .Values.services.redis.password }}
         - name: REDIS_URL
@@ -128,6 +130,8 @@ spec:
           {{ end }}
         - name: SELF_HOSTED
           value: {{ .Values.globals.selfHosted | quote }}
+        - name: SENTRY_DSN
+          value: {{ .Values.globals.sentryDSN | quote }}
         - name: POSTHOG_TOKEN
           value: {{ .Values.globals.posthogToken | quote }}
         - name: WORKER_URL
@@ -176,6 +180,18 @@ spec:
         - name: DD_APM_DD_URL
           value: https://trace.agent.datadoghq.eu
         {{ end }}
+        {{ if .Values.globals.elasticApmEnabled }}
+        - name: ELASTIC_APM_ENABLED
+          value: {{ .Values.globals.elasticApmEnabled | quote }}
+        {{ end }}
+        {{ if .Values.globals.elasticApmSecretToken }}
+        - name: ELASTIC_APM_SECRET_TOKEN
+          value: {{ .Values.globals.elasticApmSecretToken | quote }}
+        {{ end }}
+        {{ if .Values.globals.elasticApmServerUrl }}
+        - name: ELASTIC_APM_SERVER_URL
+          value: {{ .Values.globals.elasticApmServerUrl | quote }}
+        {{ end }}
         {{ if .Values.globals.globalAgentHttpProxy }}
         - name: GLOBAL_AGENT_HTTP_PROXY
           value: {{ .Values.globals.globalAgentHttpProxy | quote }}
@@ -192,48 +208,34 @@ spec:
         - name: NODE_TLS_REJECT_UNAUTHORIZED
           value: {{ .Values.services.tlsRejectUnauthorized }}
         {{ end }}
-        {{- if .Values.services.automationWorkers.enabled }}
-        - name: APP_FEATURES
-          value: "api"
-        {{- end }}
-        {{- range .Values.services.apps.extraEnv }}
-        - name: {{ .name }}
-          value: {{ .value | quote }}
-        {{- end }}
-        image: budibase/apps:{{ .Values.globals.appVersion | default .Chart.AppVersion }}
+
+        image: dhub.kubesre.xyz/budibase/apps:{{ .Values.globals.appVersion }}
         imagePullPolicy: Always
-        {{- if .Values.services.apps.startupProbe }}
-        {{- with .Values.services.apps.startupProbe }}
-        startupProbe:
-            {{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{- end }}
-        {{- if .Values.services.apps.livenessProbe }}
-        {{- with .Values.services.apps.livenessProbe }}
         livenessProbe:
-            {{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{- end }}
-        {{- if .Values.services.apps.readinessProbe }}
-        {{- with .Values.services.apps.readinessProbe }}
+          httpGet:
+            path: /health
+            port: {{ .Values.services.apps.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          timeoutSeconds: 3
         readinessProbe:
-            {{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{- end }}
+          httpGet:
+            path: /health
+            port: {{ .Values.services.apps.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          timeoutSeconds: 3
+
         name: bbapps
         ports:
         - containerPort: {{ .Values.services.apps.port }}
         {{ with .Values.services.apps.resources }}
         resources:
         {{- toYaml . | nindent 10 }}
-        {{ end }}
-        {{ if .Values.services.apps.command }}
-        command:
-        {{- toYaml .Values.services.apps.command | nindent 10 }}
-        {{ end }}
-        {{ if .Values.services.apps.args }}
-        args:
-        {{- toYaml .Values.services.apps.args | nindent 10 }}
         {{ end }}
     {{- with .Values.affinity }}
       affinity:
