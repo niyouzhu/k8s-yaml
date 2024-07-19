@@ -80,9 +80,7 @@ spec:
         labels:
       spec:
         accessModes:
-        {{- range .Values.objectStore.persistentVolume.accessModes }}
-          - {{ . | quote }}
-        {{- end }}
+        {{- .Values.objectStore.persistentVolume.accessModes }}
         resources:
           requests:
             storage: {{ .Values.objectStore.persistentVolume.size | quote }}
