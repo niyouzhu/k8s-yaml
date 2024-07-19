@@ -254,22 +254,4 @@ spec:
       {{ end }}
       restartPolicy: Always
       serviceAccountName: ""
-  volumeClaimTemplates:
-    - metadata:
-        name: minio-data
-        labels:
-      spec:
-        accessModes:
-        {{- range .Values.objectStore.persistentVolume.accessModes }}
-          - {{ . | quote }}
-        {{- end }}
-        resources:
-          requests:
-            storage: {{ .Values.objectStore.persistentVolume.size | quote }}
-      {{- if .Values.objectStore.persistentVolume.storageClass }}
-      {{- if (eq "-" .Values.objectStore.persistentVolume.storageClass) }}
-        storageClassName: ""
-      {{- else }}
-        storageClassName: "{{ .Values.objectStore.persistentVolume.storageClass }}"
-      {{- end }}
-      {{- end }}
+status: {}
