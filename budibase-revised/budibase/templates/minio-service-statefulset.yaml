@@ -53,6 +53,10 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: minio-data
+        - mountPath: /etc/localtime
+          name: localtime
+        - mountPath: /etc/timezone
+          name: timezone
     {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -74,6 +78,14 @@ spec:
       - name: minio-data
         persistentVolumeClaim:
           claimName: minio-data
+      - hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: ''
+        name: localtime
+      - hostPath:
+          path: /etc/timezone
+          type: ''
+        name: timezone          
   volumeClaimTemplates:
     - metadata:
         name: minio-data
@@ -92,5 +104,5 @@ spec:
       {{- else }}
         storageClassName: "{{ .Values.objectStore.persistentVolume.storageClass }}"
       {{- end }}
-      {{- end }}          
+      {{- end }}
 {{- end }}
