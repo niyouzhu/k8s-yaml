@@ -80,7 +80,7 @@ spec:
         labels:
       spec:
         accessModes:
-          - {{ .Values.objectStore.persistentVolume.accessModes }}
+          - ReadWriteOnce
         resources:
           requests:
             storage: {{ .Values.objectStore.persistentVolume.size | quote }}

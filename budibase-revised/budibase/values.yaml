@@ -208,7 +208,6 @@ services:
       privateKey64: ""
     persistentVolume:
       enabled: true
-      accessModes: ReadWriteOnce
       size: 10Gi
       storageClass: ""
       
