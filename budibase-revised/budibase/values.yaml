@@ -96,7 +96,7 @@ globals:
   createSecrets: true # creates an internal API key, JWT secrets and redis password for you
 
   # if createSecrets is set to false, you can hard-code your secrets here
-  apiEncryptionKey: ""
+  apiEncryptionKey: "whateveryousee"
   internalApiKey: "n9Zv0lkJhXewccoNIqVX"
   jwtSecret: "uRsoHwzCG17lRorNhnCY"
   cdnUrl: ""
