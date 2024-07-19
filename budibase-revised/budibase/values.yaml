@@ -206,10 +206,7 @@ services:
       publicKeyId: ""
       # Base64 encoded private key for the above public key
       privateKey64: ""
-    persistentVolume:
-      enabled: true
-      size: 10Gi
-      storageClass: ""
+
       
 
 # Override values in couchDB subchart
@@ -363,3 +360,10 @@ couchdb:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 1
+objectStore:
+  persistentVolume:
+    enabled: true
+    accessModes: 
+      - ReadWriteOnce
+    size: 10Gi
+    storageClass: ""
