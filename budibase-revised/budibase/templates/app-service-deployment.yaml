@@ -38,12 +38,12 @@ spec:
     spec:
       containers:
       - env:
-        - name: API_REQ_LIMIT_PER_SEC
-          value: 100000
         - name: BUDIBASE_ENVIRONMENT
           value: {{ .Values.globals.budibaseEnv }}
         - name: DEPLOYMENT_ENVIRONMENT
           value: "kubernetes"
+        - name: API_REQ_LIMIT_PER_SEC
+          value: "100000"          
         - name: COUCH_DB_URL
           {{ if .Values.services.couchdb.url }}
           value: {{ .Values.services.couchdb.url }}
