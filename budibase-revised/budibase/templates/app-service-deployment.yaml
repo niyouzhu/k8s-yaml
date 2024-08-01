@@ -38,6 +38,8 @@ spec:
     spec:
       containers:
       - env:
+        - name: API_REQ_LIMIT_PER_SEC
+          value: 100000
         - name: BUDIBASE_ENVIRONMENT
           value: {{ .Values.globals.budibaseEnv }}
         - name: DEPLOYMENT_ENVIRONMENT
