@@ -31,10 +31,10 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: gyzmessage-dev
-        image: ericnee/gyz.message:6.0.0
+        image: dhub.kubesre.xyz/ericnee/gyz.message:8.1.4
         env:
         - name: APP_ENV
-          value: Staging  
+          value: Development  
         ports:
         - containerPort: 44507
           name: web
