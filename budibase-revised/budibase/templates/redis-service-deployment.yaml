@@ -22,7 +22,7 @@ spec:
         - redis-server 
         - --requirepass 
         - {{ .Values.services.redis.password }}
-        image: redis
+        image: dhub.kubesre.xyz/library/redis
         imagePullPolicy: ""
         name: redis-service
         ports:
@@ -34,6 +34,10 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: redis-data
+        - mountPath: /etc/localtime
+          name: localtime
+        - mountPath: /etc/timezone
+          name: timezone
     {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
@@ -55,6 +59,13 @@ spec:
       - name: redis-data
         persistentVolumeClaim:
           claimName: redis-data
-
+      - hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+          type: ''
+        name: localtime
+      - hostPath:
+          path: /etc/timezone
+          type: ''
+        name: timezone
 status: {}
 {{- end }}

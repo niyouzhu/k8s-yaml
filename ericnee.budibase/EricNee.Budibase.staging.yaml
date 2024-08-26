@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: enbudibase-staging
+  labels:
+    app: enbudibase-staging
+spec:
+  ports:
+  - port: 44507
+    name: web
+  type: ClusterIP
+  selector:
+    app: enbudibase-staging
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: enbudibase-staging
+spec:
+  selector:
+    matchLabels:
+      app: enbudibase-staging # has to match .spec.template.metadata.labels
+  serviceName: "enbudibase-staging"
+  replicas: 1 # by default is 1
+  minReadySeconds: 10 # by default is 0
+  template:
+    metadata:
+      labels:
+        app: enbudibase-staging # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: enbudibase-staging
+        image: ericnee/ericnee.budibase:1.0.0
+        env:
+        - name: APP_ENV
+          value: Staging
+        ports:
+        - containerPort: 44507
+          name: web
+        volumeMounts:
+        - name: log
+          mountPath: /app/Logs
+        - name: localtime
+          mountPath: /etc/localtime
+        - name: timezone
+          mountPath: /etc/timezone
+      volumes:
+        - name: localtime
+          hostPath: 
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: timezone
+          hostPath: 
+            path: /etc/timezone
+  volumeClaimTemplates:
+  - metadata:
+      name: log
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "nfs"
+      resources:
+        requests:
+          storage: 5Gi
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
